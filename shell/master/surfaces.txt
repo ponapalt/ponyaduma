@@ -63,4 +63,24 @@ animation0.pattern0,overlay,5108,100,118,59
 animation0.pattern2,overlay,-1,100,118,59
 }
 
+surface.append0-8
+{
+collisionex0,Head,polygon,115,44,127,48,105,75,112,86,135,61,160,61,174,66,168,46,181,40,156,26,126,32
+collision1,125,75,172,116,Face
+collision2,171,176,171,176,Bust
+collisionex3,Skirt,polygon,99,249,73,283,132,306,185,300,200,293,182,246,140,258
+collisionex4,Ear,polygon,96,48,106,74,126,47
+collisionex5,Ear,polygon,170,46,180,79,205,46
+}
 
+surface.append0-2,4-8
+{
+collisionex6,Tail,polygon,206,290,190,296,221,323,277,292,250,242,231,263,241,279,217,296
+}
+
+surface.append3
+{
+collisionex6,ID,polygon,182,301,186,323,199,310,200,296
+collisionex7,ID,polygon,151,331,152,343,169,338,165,323
+collisionex8,ID,polygon,131,338,99,351,115,372,124,368,132,353
+}

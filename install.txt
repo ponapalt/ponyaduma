@@ -1,5 +1,6 @@
 charset,Shift_JIS
-type,ghost
 name,‚Û‚É‚á‚Ã‚Ü
+type,ghost
 directory,ponyaduma
+refresh,0
 

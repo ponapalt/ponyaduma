@@ -1,0 +1,1 @@
+ghost/master/satori.dll,nonar,noupdate
