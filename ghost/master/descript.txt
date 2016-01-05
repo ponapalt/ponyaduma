@@ -1,0 +1,10 @@
+charset,Shift_JIS
+
+name,‚Û‚É‚á‚Ã‚Ü
+type,ghost
+
+sakura.name,‚Û‚É‚á‚Ã‚Ü
+
+sstp.allowunspecifiedsend,1
+
+shiori,yaya.dll
