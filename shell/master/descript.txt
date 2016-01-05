@@ -9,26 +9,16 @@ kero.balloon.alignment,none
 shiori.logo.x,0
 shiori.logo.y,0
 
-sakura.name,ぽにゃづま
-kero.name,none
-
 sakura.balloon.offsetx,0
 sakura.balloon.offsety,0
 kero.balloon.offsetx,0
 kero.balloon.offsety,0
 
-menu.background.font.color.r,64
-menu.background.font.color.g,16
-menu.background.font.color.b,0
+kero.bindgroup9100.name,外装色変更,水ばぐゅう
+kero.bindgroup9100.default,0
+kero.bindgroup9110.name,外装色変更,青ばぐゅう
+kero.bindgroup9110.default,0
+kero.bindgroup9120.name,外装色変更,内燃ばぐゅう
+kero.bindgroup9120.default,0
 
-menu.foreground.font.color.r,255
-menu.foreground.font.color.g,255
-menu.foreground.font.color.b,255
-
-menu.disable.font.color.r,128
-menu.disable.font.color.g,128
-menu.disable.font.color.b,128
-
-menu.separator.color.r,64
-menu.separator.color.g,16
-menu.separator.color.b,0
+kero.menu,auto
