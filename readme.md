@@ -24,6 +24,7 @@
 * あやりりすEX Poweredなので例の簡単な書き方ができるのです。
 * SakuraScript生でも書けるのです。
 * 詳しくは yaya_aitalk.txt を見てほしいのです。
+* githubがわからないというひとは https://github.com/ponapalt/ponyaduma/issues/2 に書いてほしいのです。でも書くのにもgithubアカウントが要るのです。なかなかうまくいかないのです。
 
 ## 更新履歴
 
