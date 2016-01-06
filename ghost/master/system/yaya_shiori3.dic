@@ -111,6 +111,10 @@ load
 	if ISVAR('ghostupmin_last') == 0 {
 		ghostupmin_last = 0
 	}
+	if ISVAR('ghostuptimes') == 0 {
+		ghostuptimes = 0
+	}
+	ghostuptimes += 1
 
 	// –ˆ‰ñ‹N“®‚Ì‰Šú‰»
 	SHIORI3FW.ResetAITalkInterval()

@@ -7,19 +7,12 @@
 //シェル切り替え
 //******************************************************************************
 
-//------------------------------------------------------------------------------
-//シェルチェンジ開始
-//------------------------------------------------------------------------------
-
-OnShellChanging
+シェル変更前
 {
 	"\0\s[0]改装するのです。\e"
 }
 
-//------------------------------------------------------------------------------
-//シェルチェンジ完了
-//------------------------------------------------------------------------------
-OnShellChanged
+シェル変更後
 {
 	"\0\s[0]改装したのです。\e"
 }
@@ -74,11 +67,11 @@ OnInstallComplete
 		}
 		
 		if _id != '' {
-			"切り替えますか？"
+			"切り替えますか？\n\n"
 			--
-			AYATEMPLATE.MenuItem("切り替える","OnAYATEMPLATE.InstallChange",_id,200)
+			メニュー("切り替える","OnAYATEMPLATE.InstallChange",_id) + '\n'
 			--
-			AYATEMPLATE.MenuItem("切り替えない","Menu_CANCEL")
+			メニュー("切り替えない","Menu_CANCEL")
 		}
 	}
 }
@@ -333,18 +326,18 @@ OnHeadlinesense.OnFind
 	if reference[2] == "First" || reference[2] == "Next"
 	{
 		//---- 次のページがある場合
-		AYATEMPLATE.MenuItem("次のページ","")
+		メニュー("次のページ","") + '\n'
 		--
-		AYATEMPLATE.MenuItem("サイトへ",reference[1])
+		メニュー("サイトへ",reference[1]) + '\n[150]'
 		--
-		AYATEMPLATE.MenuItem("やめ","Menu_HEADLINECANCEL",150)
+		メニュー("やめ","Menu_HEADLINECANCEL")
 	}
 	else
 	{
 		//---- 次のページがない場合
-		AYATEMPLATE.MenuItem("サイトへ",reference[1])
+		メニュー("サイトへ",reference[1]) + '\n[150]'
 		--
-		AYATEMPLATE.MenuItem("やめ","Menu_HEADLINECANCEL",150)
+		メニュー("やめ","Menu_HEADLINECANCEL")
 	}
 }
 
