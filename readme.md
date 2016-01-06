@@ -23,7 +23,7 @@
 
 * あやりりすEX Poweredなので例の簡単な書き方ができるのです。
 * SakuraScript生でも書けるのです。
-
+* 詳しくは yaya_aitalk.txt を見てほしいのです。
 
 ## 更新履歴
 
