@@ -18,6 +18,8 @@ animation0.pattern2,overlay,-1,100,118,59
 
 surface1
 {
+element0,overlay,surface0000.png,0,0
+element1,overlay,element0001.png,118,59
 animation0.interval,sometimes
 animation0.pattern0,overlay,5101,100,118,59
 animation0.pattern2,overlay,-1,100,118,59
@@ -25,6 +27,8 @@ animation0.pattern2,overlay,-1,100,118,59
 
 surface2
 {
+element0,overlay,surface0000.png,0,0
+element1,overlay,element0002.png,118,59
 }
 
 surface3
@@ -36,10 +40,14 @@ animation0.pattern2,overlay,-1,100,118,59
 
 surface4
 {
+element0,overlay,surface0003.png,0,0
+element1,overlay,element0004.png,118,59
 }
 
 surface5
 {
+element0,overlay,surface0000.png,0,0
+element1,overlay,element0005.png,118,59
 animation0.interval,sometimes
 animation0.pattern0,overlay,5105,100,118,59
 animation0.pattern2,overlay,-1,100,118,59
@@ -47,10 +55,14 @@ animation0.pattern2,overlay,-1,100,118,59
 
 surface6
 {
+element0,overlay,surface0000.png,0,0
+element1,overlay,surface5100.png,118,59
 }
 
 surface7
 {
+element0,overlay,surface0000.png,0,0
+element1,overlay,element0007.png,118,59
 animation0.interval,sometimes
 animation0.pattern0,overlay,5107,100,118,59
 animation0.pattern2,overlay,-1,100,118,59
@@ -58,6 +70,8 @@ animation0.pattern2,overlay,-1,100,118,59
 
 surface8
 {
+element0,overlay,surface0000.png,0,0
+element1,overlay,element0008.png,118,59
 animation0.interval,sometimes
 animation0.pattern0,overlay,5108,100,118,59
 animation0.pattern2,overlay,-1,100,118,59
@@ -97,12 +111,17 @@ animation9120.pattern0,bind,9120,0,0,0
 
 surface11
 {
+element0,overlay,surface0010.png,0,0
+element1,overlay,element0011.png,118,59
 animation9100.interval,bind
-animation9100.pattern0,bind,9101,0,0,0
+animation9100.pattern0,bind,9100,0,0,0
+animation9100.pattern1,bind,9101,0,0,0
 animation9110.interval,bind
-animation9110.pattern0,bind,9111,0,0,0
+animation9110.pattern0,bind,9110,0,0,0
+animation9110.pattern1,bind,9111,0,0,0
 animation9120.interval,bind
-animation9120.pattern0,bind,9121,0,0,0
+animation9120.pattern0,bind,9120,0,0,0
+animation9120.pattern1,bind,9121,0,0,0
 }
 
 surface.append10-11
