@@ -112,7 +112,7 @@ animation9120.pattern0,bind,9120,0,0,0
 surface11
 {
 element0,overlay,surface0010.png,0,0
-element1,overlay,element0011.png,118,59
+element1,overlay,element0011.png,0,0
 animation9100.interval,bind
 animation9100.pattern0,bind,9100,0,0,0
 animation9100.pattern1,bind,9101,0,0,0
