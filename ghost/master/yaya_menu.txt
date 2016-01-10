@@ -47,7 +47,7 @@ OpenMenu
 Menu_AITALK
 {
 	//---- 明示的にAIトーク開始を指示
-	OnAiTalk
+	ランダムトーク実行
 }
 
 //---- さっきの話は
