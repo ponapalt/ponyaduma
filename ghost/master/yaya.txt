@@ -9,12 +9,7 @@
 //システム辞書
 //------------------------------------------------------------------------------
 include, system_config.txt		// YAYA:設定辞書。必ず最初に指定すること。
-
-//あやりりす
-dic, aya_lilith_config.dic
-dic, aya_lilith.dic
-dic, aya_lilith_ex_config.dic
-dic, aya_lilith_ex.dic
+include, lilith_config.txt		// YAYA:設定辞書。必ず最初に指定すること。
 
 dic, yaya_word.txt			// 単語辞書
 dic, yaya_string.txt		// 文字列リソース辞書
