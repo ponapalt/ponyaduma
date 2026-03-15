@@ -4,7 +4,7 @@
 
 > 「バランスが大事なのです！」
 
-##[ダウンロード](https://github.com/ponapalt/ponyaduma/releases/latest/download/ponyaduma.nar)
+## [ダウンロード](https://github.com/ponapalt/ponyaduma/releases/latest/download/ponyaduma.nar)
 
 ## キャラクター紹介
 
