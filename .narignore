@@ -1,7 +1,7 @@
 WORK/
 tamac.exe
-/.claude
+.claude/
+.github/
 .git/
 .gitignore
 ghost/master/yaya_variable.cfg
-CLAUDE.md
