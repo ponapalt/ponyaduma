@@ -2,7 +2,7 @@ name: Build and Release NAR
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
@@ -69,7 +69,7 @@ jobs:
           fi
 
       # updates2.dau をリポジトリに commit & push
-      # → raw.githubusercontent.com/YAYA-shiori/_the_hand_/main/updates2.dau で参照可能になる
+      # → raw.githubusercontent.com/ponapalt/ponyaduma/master/updates2.dau で参照可能になる
       # GITHUB_TOKEN による push はワークフローを再トリガーしない
       - name: Commit updates2.dau
         if: steps.check.outputs.changed == 'true'
@@ -79,9 +79,9 @@ jobs:
           git commit -m "chore: update updates2.dau / delete.txt"
           git push
 
-      # _the_hand_.nar を生成（中身はZIP、拡張子はnar）
+      # ponyaduma.nar を生成（中身はZIP、拡張子はnar）
       # updates2.dau も NAR 内に同梱される
-      - name: Create _the_hand_.nar
+      - name: Create ponyaduma.nar
         if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         run: python release_ghost.py nar
 
@@ -106,7 +106,7 @@ jobs:
           gh release create "${{ steps.tag.outputs.tag }}" \
             --title "${{ steps.tag.outputs.title }}" \
             --generate-notes \
-            _the_hand_.nar
+            ponyaduma.nar
 
       # 最新リリース1件のみ残し、古いリリースとタグを自動削除
       - name: Delete old releases
