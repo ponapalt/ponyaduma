@@ -1,5 +1,4 @@
 .gitmodules
 developer_options.txt
 ghost/master/satori.dll
-shell/master/surface02030.png
-shell/master/surface02031.png
+profile.txt
