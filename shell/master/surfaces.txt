@@ -174,10 +174,6 @@ animation2028.interval,none
 animation2028.pattern0,overlay,2028,0,200,70
 animation2029.interval,none
 animation2029.pattern0,overlay,2029,0,200,70
-animation2030.interval,none
-animation2030.pattern0,overlay,2030,0,200,70
-animation2031.interval,none
-animation2031.pattern0,overlay,2031,0,200,70
 animation2032.interval,none
 animation2032.pattern0,overlay,2032,0,200,70
 animation2033.interval,none
@@ -257,10 +253,6 @@ animation2028.interval,none
 animation2028.pattern0,overlay,2028,0,150,40
 animation2029.interval,none
 animation2029.pattern0,overlay,2029,0,150,40
-animation2030.interval,none
-animation2030.pattern0,overlay,2030,0,150,40
-animation2031.interval,none
-animation2031.pattern0,overlay,2031,0,150,40
 animation2032.interval,none
 animation2032.pattern0,overlay,2032,0,150,40
 animation2033.interval,none
