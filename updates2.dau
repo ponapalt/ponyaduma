@@ -1,9 +1,7 @@
-.claude/settings.local.json41bd29f8135f636cada94a40f94f6e12size=89charset=UTF-8
-.github/workflows/release.yml10ffd1380562a9e7564b28463a3feb4asize=4699
-.gitmodulesb47d5e7fa1f39233321243fa41e4626bsize=110
-.narignore7e4ddfbd4c1021ec811de554f3ebf3eesize=83
-.updateignore7e4ddfbd4c1021ec811de554f3ebf3eesize=83
-delete.txtd41d8cd98f00b204e9800998ecf8427esize=0
+.narignore09dc8cb9ac6e8fec0b8fd0cb76d58aa0size=82charset=UTF-8
+.updateignore09dc8cb9ac6e8fec0b8fd0cb76d58aa0size=82
+CLAUDE.mddc21a17615b4c75a72bc2f3c692910e3size=10857
+delete.txt879e1017d20100cfbee3dcc376b48fe1size=12
 developer_options.txtac696f96a067e384d76f42fcf7347e06size=40
 ghost/master/aya_lilith_config.dic0a5c1702ff55d944c1d155c4830bca65size=2129
 ghost/master/aya_lilith_ex_config.dic3cd2b298c146808c366be98bcbb58871size=1337
