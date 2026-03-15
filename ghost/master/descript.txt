@@ -1,7 +1,7 @@
 charset,UTF-8
 name,ぽにゃづま
 type,ghost
-craftmanurl,http://ms.shillest.net/ponyaduma.xhtml
+craftmanurl,https://github.com/ponapalt/ponyaduma
 homeurl,https://raw.githubusercontent.com/ponapalt/ponyaduma/master/
 sakura.name,ぽにゃづま
 kero.name,連装蟲ゅう
