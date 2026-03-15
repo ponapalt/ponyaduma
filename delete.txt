@@ -1,2 +1,3 @@
 .gitmodules
+developer_options.txt
 ghost/master/satori.dll
