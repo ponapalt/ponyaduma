@@ -90,8 +90,8 @@ jobs:
         if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
         id: tag
         run: |
-          TAG="v$(date -u +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD)"
-          TITLE="$(date -u +%Y/%m/%d)"
+          TAG="v$(TZ=Asia/Tokyo date +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD)"
+          TITLE="$(TZ=Asia/Tokyo date +%Y/%m/%d)"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "title=$TITLE" >> "$GITHUB_OUTPUT"
           echo "Release tag: $TAG, title: $TITLE"
