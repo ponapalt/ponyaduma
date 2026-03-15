@@ -1,5 +1,5 @@
-charset,Shift_JIS
-name,�ۂɂ�Â�
+charset,UTF-8
+name,ぽにゃづま
 type,ghost
 directory,ponyaduma
 refresh,0
