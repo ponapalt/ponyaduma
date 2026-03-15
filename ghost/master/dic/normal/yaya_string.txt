@@ -17,7 +17,7 @@ On_username
 //------------------------------------------------------------------------------
 On_homeurl
 {
-	"http://ms.shillest.net/ghost/ponyaduma/"
+	"https://raw.githubusercontent.com/ponapalt/ponyaduma/master/"
 }
 
 //------------------------------------------------------------------------------

@@ -2,7 +2,7 @@ charset,UTF-8
 name,ぽにゃづま
 type,ghost
 craftmanurl,http://ms.shillest.net/ponyaduma.xhtml
-homeurl,http://ms.shillest.net/ghost/ponyaduma/
+homeurl,https://raw.githubusercontent.com/ponapalt/ponyaduma/master/
 sakura.name,ぽにゃづま
 kero.name,連装蟲ゅう
 sakura.seriko.defaultsurface,0

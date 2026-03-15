@@ -1,0 +1,119 @@
+name: Build and Release NAR
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # 前回リリースタグを取得（delete.txt の差分比較に使用）
+      - name: Get previous release tag
+        id: prev_tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PREV=$(gh release list --limit 100 --json tagName,createdAt \
+            --jq 'sort_by(.createdAt) | reverse | .[0].tagName // ""')
+          echo "tag=$PREV" >> "$GITHUB_OUTPUT"
+          echo "Previous release tag: ${PREV:-none}"
+
+      # 前回タグのツリーオブジェクトを取得（git ls-tree に必要）
+      # タグは常に1件のみ（古いものは削除済み）なのでこれだけで十分
+      - name: Fetch previous tag
+        if: steps.prev_tag.outputs.tag != ''
+        run: |
+          git fetch --depth=1 origin \
+            "refs/tags/${{ steps.prev_tag.outputs.tag }}:refs/tags/${{ steps.prev_tag.outputs.tag }}"
+
+      # delete.txt を生成（前リリースから削除されたファイルを列挙）
+      # updates2.dau よりも先に生成することで、updates2.dau に delete.txt が含まれる
+      - name: Generate delete.txt
+        run: |
+          PREV="${{ steps.prev_tag.outputs.tag }}"
+          if [ -n "$PREV" ]; then
+            python release_ghost.py delete --prev-ref "$PREV"
+          else
+            python release_ghost.py delete
+          fi
+
+      # updates2.dau を生成
+      - name: Generate updates2.dau
+        run: python release_ghost.py dau
+
+      # updates2.dau / delete.txt に変更があるか確認し、後続ステップに伝える
+      - name: Check for changes
+        id: check
+        run: |
+          git add updates2.dau delete.txt
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "変更なし。リリースをスキップします。"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "変更あり。リリースを続行します。"
+          fi
+
+      # updates2.dau をリポジトリに commit & push
+      # → raw.githubusercontent.com/YAYA-shiori/_the_hand_/main/updates2.dau で参照可能になる
+      # GITHUB_TOKEN による push はワークフローを再トリガーしない
+      - name: Commit updates2.dau
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: update updates2.dau / delete.txt"
+          git push
+
+      # _the_hand_.nar を生成（中身はZIP、拡張子はnar）
+      # updates2.dau も NAR 内に同梱される
+      - name: Create _the_hand_.nar
+        if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: python release_ghost.py nar
+
+      # リリースタグを決定（日時 + コミットSHA短縮形）
+      - name: Set release tag
+        if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        id: tag
+        run: |
+          TAG="v$(date -u +%Y%m%d%H%M%S)-$(git rev-parse --short HEAD)"
+          TITLE="$(date -u +%Y/%m/%d)"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "Release tag: $TAG, title: $TITLE"
+
+      # GitHub Release を作成して NAR のみをアップロード
+      # （updates2.dau は NAR 内に同梱 & raw.githubusercontent.com で参照）
+      - name: Create GitHub Release
+        if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.tag.outputs.tag }}" \
+            --title "${{ steps.tag.outputs.title }}" \
+            --generate-notes \
+            _the_hand_.nar
+
+      # 最新リリース1件のみ残し、古いリリースとタグを自動削除
+      - name: Delete old releases
+        if: steps.check.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release list --limit 100 --json tagName,createdAt \
+            --jq 'sort_by(.createdAt) | reverse | .[1:].[].tagName' \
+            | xargs -r -I{} gh release delete {} --yes --cleanup-tag
