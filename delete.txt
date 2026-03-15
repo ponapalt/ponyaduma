@@ -1,4 +1,12 @@
 .gitmodules
 developer_options.txt
+ghost/master/dic/normal/yaya_aitalk.txt
+ghost/master/dic/normal/yaya_bootend.txt
+ghost/master/dic/normal/yaya_change.txt
+ghost/master/dic/normal/yaya_etc.txt
+ghost/master/dic/normal/yaya_menu.txt
+ghost/master/dic/normal/yaya_mouse.txt
+ghost/master/dic/normal/yaya_string.txt
+ghost/master/dic/normal/yaya_word.txt
 ghost/master/satori.dll
 profile.txt
