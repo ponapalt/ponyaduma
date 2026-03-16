@@ -1,6 +1,6 @@
 .narignore09dc8cb9ac6e8fec0b8fd0cb76d58aa0size=82charset=UTF-8
 .updateignore09dc8cb9ac6e8fec0b8fd0cb76d58aa0size=82
-CLAUDE.mdb4b47eeec67de78294715101bcfa4714size=18350
+CLAUDE.mdf520724373f4d9421bee31c5cae1ddfasize=18469
 delete.txt81e58b619344d06b0efe4a5deb91c688size=383
 ghost/master/aya_lilith_config.dic0a5c1702ff55d944c1d155c4830bca65size=2129
 ghost/master/aya_lilith_ex_config.dic3cd2b298c146808c366be98bcbb58871size=1337
@@ -8,8 +8,8 @@ ghost/master/descript.txt705eb57a18350bb2412e943243ba8c85size=322
 ghost/master/dic/emerg/yaya_emerg_dic.dicafd0b1b5b1651c40b167a9a766b354fdsize=641
 ghost/master/dic/emerg/yaya_homeurl.dic4dc96a4efa4571f939726442c47ee611size=639
 ghost/master/dic/normal/aitalk.txt77e3caaaaa43731969700316f78ae66asize=38804
-ghost/master/dic/normal/bootend.txt13dea591ddc4eb719e80b473ad1f0d7fsize=13414
-ghost/master/dic/normal/change.txtc808be13ad4c31b0b8cb192226b1c5fcsize=2079
+ghost/master/dic/normal/bootend.txtb01af09b18044652de5a373e90538701size=21902
+ghost/master/dic/normal/change.txta298d6491e09d7f23ff716733918ffb0size=3563
 ghost/master/dic/normal/etc.txt0cb6458f1f393c178ba8c945fff52d21size=18785
 ghost/master/dic/normal/menu.txt27d5d7c34e50550a38bd219aa9ddd0f4size=3718
 ghost/master/dic/normal/mouse.txt4236fe41cbfa5b3cfad2e337a8a2d620size=11403
@@ -32,7 +32,7 @@ ghost/master/system_config.txt3965602fadd8acb2ee46c0310704c3e1size=682
 ghost/master/yaya.dll2b409fa1351564a0f48126c163e538dfsize=884736
 ghost/master/yaya.txtf98c089c3a86bfdbe9f723cc3137c8c4size=2056
 install.txt9cdb6881914738265fc7970ebe63d06bsize=77
-readme.md8784e1930b118e3064fca9c09eceb282size=2942
+readme.mdbdc88552819ab3cae0cf4df044bf7a8bsize=3054
 shell/master/descript.txt87633848eb5640ecf9a70c220b5fa4a5size=524
 shell/master/element0000.png955e3e868773deb0b57c1a45218f6232size=6855
 shell/master/element0001.png60229e265601b300b66e8c6a33e25badsize=6860
