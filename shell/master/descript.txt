@@ -11,8 +11,8 @@ shiori.logo.y,0
 
 sakura.balloon.offsetx,40
 sakura.balloon.offsety,-20
-kero.balloon.offsetx,0
-kero.balloon.offsety,30
+kero.balloon.offsetx,20
+kero.balloon.offsety,170
 
 kero.bindgroup9100.name,外装色変更,水ばぐゅう
 kero.bindgroup9100.default,0
