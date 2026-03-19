@@ -216,7 +216,8 @@ SHIORI:yaya.dllのマニュアルは以下にあります：
 あやりりす/あやりりすEX(イベント処理＋トークべた書きライブラリ)のサンプルは以下にあります：
 ..\ayalilith
 
-./tamac.exe ghost\master\yaya.dll で書いた辞書の文法チェックができます。
+書いた辞書の文法チェックができます：
+./tamac.exe "ghost\master\yaya.dll"
 
 ## あやりりすEX記法
 

@@ -410,6 +410,19 @@ OnNetworkHeavy
 //------------------------------------------------------------------------------
 OnNetworkStatusChange
 {
+	// ステータスが変わってなければ何もしない
+	if NetworkStatus == reference[0]
+	{
+		return
+	}
+	NetworkStatus = reference[0]
+
+	// NOTIFYリクエストではスクリプトを返さない
+	if REQ.COMMAND == 'NOTIFY'
+	{
+		return
+	}
+
 	if reference[0] == "online"
 	{
 		<<"

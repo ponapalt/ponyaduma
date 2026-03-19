@@ -3,7 +3,8 @@
     "allow": [
       "Bash(head:*)",
       "Bash(cd:*)",
-      "Bash(./tamac.exe ghost/master/yaya.dll)"
+      "Bash(./tamac.exe ghost/master/yaya.dll)",
+      "Bash(./tamac.exe ghostmasteryaya.dll)"
     ]
   }
 }
