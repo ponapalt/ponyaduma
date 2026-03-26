@@ -226,7 +226,10 @@ SHIORI:yaya.dllのマニュアルは以下にあります：
 
 ## あやりりすEX記法
 
-SakuraScriptの簡易記法変換エンジン。トークをべた書きで記述でき、スコープ指定・サーフィス変更・\eなどを自動生成する。
+SakuraScriptの簡易記法変換エンジン。トークをべた書きで記述でき、スコープ指定・サーフィス変更・\eなどを自動生成する。マニュアルは以下。
+
+ghost\master\dic\system\aya_lilith\manual_aya_lilith.md
+ghost\master\dic\system\aya_lilith\manual_aya_lilith_ex.md
 
 ### このゴーストのEXヘッダ設定（aya_lilith_ex_config.dic）
 
