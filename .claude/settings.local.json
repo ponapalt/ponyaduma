@@ -6,7 +6,8 @@
       "Bash(./tamac.exe ghost/master/yaya.dll)",
       "Bash(./tamac.exe ghostmasteryaya.dll)",
       "Bash(./tamac.exe \"ghost\\\\master\\\\yaya.dll\")",
-      "Bash(find . -path */normal/* -name *.txt)"
+      "Bash(find . -path */normal/* -name *.txt)",
+      "Bash(git show:*)"
     ]
   }
 }
