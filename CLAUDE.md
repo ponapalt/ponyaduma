@@ -226,7 +226,7 @@ SHIORI:yaya.dllのマニュアルは以下にあります：
 ..\ayalilith
 
 書いた辞書の文法チェックができます：
-./tamac.exe "ghost\master\yaya.dll"
+.\tamac.exe "ghost\master\yaya.dll"
 
 ## あやりりすEX記法
 
