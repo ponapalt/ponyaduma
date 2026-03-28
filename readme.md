@@ -2,6 +2,8 @@
 
 伺かゴースト「ぽにゃづま」
 
+![サムネイル](https://raw.githubusercontent.com/ponapalt/ponyaduma/master/thumbnail.png)
+
 > 「バランスが大事なのです！」
 
 ## [ダウンロード](https://github.com/ponapalt/ponyaduma/releases/latest/download/ponyaduma.nar)
