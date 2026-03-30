@@ -55,11 +55,14 @@ jobs:
       - name: Generate updates2.dau
         run: python release_ghost.py dau
 
+      - name: Generate updates2.dau for balloon
+        run: python release_ghost.py dau ponyaballoon/
+
       # updates2.dau / delete.txt に変更があるか確認し、後続ステップに伝える
       - name: Check for changes
         id: check
         run: |
-          git add updates2.dau delete.txt
+          git add updates2.dau delete.txt ponyaballoon/updates2.dau ponyaballoon/delete.txt
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "変更なし。リリースをスキップします。"

@@ -1,0 +1,4 @@
+charset,UTF-8
+name,ぽにゃバルーン
+type,balloon
+directory,ponyaballoon

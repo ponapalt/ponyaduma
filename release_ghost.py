@@ -9,15 +9,15 @@ Subcommands:
   delete  Generate delete.txt (files removed since a previous git ref)
 
 Usage:
-  python release_ghost.py dau    [--root DIR] [--output PATH]
+  python release_ghost.py dau    [DIR] [--output PATH]
   python release_ghost.py nar    [--root DIR] [--output PATH]
   python release_ghost.py delete [--root DIR] [--output PATH] [--prev-ref REF]
 
 Defaults:
-  --root    current directory
-  --output  <root>/updates2.dau  (dau)
-            <root>/<dirname>.nar (nar)
-            <root>/delete.txt    (delete)
+  DIR / --root  current directory
+  --output      <root>/updates2.dau  (dau)
+                <root>/<dirname>.nar (nar)
+                <root>/delete.txt    (delete)
 
 Ignore files (gitignore syntax):
   .updateignore  patterns excluded from updates2.dau and delete.txt
@@ -234,8 +234,12 @@ def main() -> None:
     # dau サブコマンド
     p_dau = sub.add_parser('dau', help='generate updates2.dau')
     p_dau.add_argument(
+        'dir', nargs='?', type=Path, default=None,
+        metavar='DIR', help='target directory (relative path; default: current directory)',
+    )
+    p_dau.add_argument(
         '--output', type=Path, default=None,
-        metavar='PATH', help='output path (default: <root>/updates2.dau)',
+        metavar='PATH', help='output path (default: <dir>/updates2.dau)',
     )
 
     # nar サブコマンド
@@ -260,8 +264,13 @@ def main() -> None:
     root = args.root.resolve()
 
     if args.command == 'dau':
-        output = args.output or root / 'updates2.dau'
-        cmd_dau(root, output.resolve())
+        # 位置引数 DIR が指定された場合はそちらを優先（カレントディレクトリからの相対パス）
+        if args.dir is not None:
+            dau_root = args.dir.resolve()
+        else:
+            dau_root = root
+        output = args.output or dau_root / 'updates2.dau'
+        cmd_dau(dau_root, output.resolve())
 
     elif args.command == 'nar':
         output = args.output or (root / (root.name + '.nar'))

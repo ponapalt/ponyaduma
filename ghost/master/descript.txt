@@ -1,6 +1,8 @@
 charset,UTF-8
 name,ぽにゃづま
 type,ghost
+craftman,SSP BUGTRAQ
+craftmanw,ばぐとら研究所
 craftmanurl,https://github.com/ponapalt/ponyaduma
 homeurl,https://raw.githubusercontent.com/ponapalt/ponyaduma/master/
 sakura.name,ぽにゃづま
@@ -9,4 +11,4 @@ sakura.seriko.defaultsurface,0
 kero.seriko.defaultsurface,10
 balloon.defaultsurface,0
 shiori,yaya.dll
-
+default.balloon.path,ponyaballoon

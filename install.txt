@@ -3,4 +3,4 @@ name,ぽにゃづま
 type,ghost
 directory,ponyaduma
 refresh,0
-
+balloon.directory,ponyaballoon
