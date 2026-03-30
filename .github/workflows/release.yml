@@ -62,7 +62,7 @@ jobs:
       - name: Check for changes
         id: check
         run: |
-          git add updates2.dau delete.txt ponyaballoon/updates2.dau ponyaballoon/delete.txt
+          git add updates2.dau delete.txt ponyaballoon/updates2.dau
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "変更なし。リリースをスキップします。"
