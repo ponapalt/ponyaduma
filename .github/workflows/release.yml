@@ -56,7 +56,7 @@ jobs:
         run: python release_ghost.py dau
 
       - name: Generate updates2.dau for balloon
-        run: python release_ghost.py dau ponyaballoon/
+        run: python release_ghost.py --root ponyaballoon/ dau
 
       # updates2.dau / delete.txt に変更があるか確認し、後続ステップに伝える
       - name: Check for changes
