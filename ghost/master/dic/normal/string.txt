@@ -54,8 +54,7 @@ On_recommendrootbutton.caption
 おすすめ0
 {
 <<"
-里々/整備班カスタム | http://code.google.com/p/satoriya-shiori/ | 
-華和梨              | http://kawari.sourceforge.net/            | 
+YAYA | https://github.com/YAYA-shiori | 
 ">>
 }
 
