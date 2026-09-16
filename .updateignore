@@ -7,3 +7,16 @@ CLAUDE.md
 .gitignore
 ghost/master/yaya_variable.cfg
 ponyaballoon/
+
+# 開発キット（tools/update-devkit.ps1 が管理するもの）
+AGENTS.md
+GHOST.md
+DEVKIT-GUIDE.md
+.mcp.json
+.editorconfig
+.gitattributes
+docs/
+tools/
+*.devkit-new
+*.yaya-dic-new
+ghost/master/yayalint_config.lua

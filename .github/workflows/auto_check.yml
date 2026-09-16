@@ -1,0 +1,30 @@
+name: auto check
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  check:
+    name: auto check
+    runs-on: windows-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: install tamac
+        shell: pwsh
+        env:
+          # tamac.exe comes from its latest release; the token avoids the rate limit of anonymous GitHub API requests
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./tools/setup.ps1 -Tool tamac
+      - name: dictionary check
+        shell: pwsh
+        run: ./tools/check-dic.ps1 -Ci
+      - name: development kit lock check
+        # Runs only in the repository that distributes the kit (source in tools/devkit.json)
+        shell: pwsh
+        run: ./tools/update-devkit.ps1 -VerifyLock
