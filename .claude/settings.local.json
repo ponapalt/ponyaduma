@@ -9,5 +9,9 @@
       "Bash(find . -path */normal/* -name *.txt)",
       "Bash(git show:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "ukagaka-doc"
+  ],
+  "enableAllProjectMcpServers": true
 }

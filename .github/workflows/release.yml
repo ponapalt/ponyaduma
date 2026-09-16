@@ -1,8 +1,11 @@
 name: Build and Release NAR
 
+# auto check ワークフローが master で成功したときだけリリースする
 on:
-  push:
+  workflow_run:
+    workflows: ["auto check"]
     branches: [master]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -10,6 +13,10 @@ permissions:
 
 jobs:
   release:
+    # workflow_run は失敗・キャンセル時にも発火するため、成功時のみ続行する
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     steps:
