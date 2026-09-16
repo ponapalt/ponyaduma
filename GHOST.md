@@ -285,8 +285,8 @@ SSP作者「ぽな」の自己パロディゴースト。他のぽなパロデ�
 
 このゴーストのトークは、素のさくらスクリプトではなく **あやりりす EX 記法** で書く。記法の詳細はすべて下のマニュアルにある。書く前に読むこと。
 
-- `ghost/master/dic/system/aya_lilith/manual_aya_lilith.md`
-- `ghost/master/dic/system/aya_lilith/manual_aya_lilith_ex.md`
+- `ghost/master/dic/system/docs/manual_aya_lilith.md`
+- `ghost/master/dic/system/docs/manual_aya_lilith_ex.md`
 
 EX ヘッダの設定（`ghost/master/aya_lilith_ex_config.dic`）:
 
