@@ -8,5 +8,7 @@ ghost/master/dic/normal/yaya_menu.txt
 ghost/master/dic/normal/yaya_mouse.txt
 ghost/master/dic/normal/yaya_string.txt
 ghost/master/dic/normal/yaya_word.txt
+ghost/master/dic/system/aya_lilith/manual_aya_lilith.md
+ghost/master/dic/system/aya_lilith/manual_aya_lilith_ex.md
 ghost/master/satori.dll
 profile.txt
