@@ -110,12 +110,6 @@ Add-DoctorItem -Id 'tamac-version' -Name "tamac.exe $tamacMinimum or later" -Lev
     -Detail $(if ($null -eq $tamacCurrent) { 'not installed (see tamac.exe)' } elseif ($tamacCurrent) { 'ok' } else { "v$tamacVersion is older than $tamacMinimum" }) `
     -Fix "Run: $ps tools/setup.ps1 -Tool tamac (downloads the latest release)"
 
-$yayalintPath = Get-DevkitToolPath 'yayalint'
-Add-DoctorItem -Id 'yayalint' -Name 'yayalint' -Level 'optional' -Ok (Test-Path -LiteralPath $yayalintPath) `
-    -Purpose 'Static analysis of dictionaries (tools/lint.ps1)' `
-    -Detail $(if (Test-Path -LiteralPath $yayalintPath) { "$($manifest.yayalint.version) in tools/bin" } else { 'not installed' }) `
-    -Fix "Run: $ps tools/setup.ps1"
-
 # --- SSP -------------------------------------------------------------------------------
 $ssp = Resolve-SspPath
 $sspOk = [bool]$ssp
@@ -148,20 +142,6 @@ Add-DoctorItem -Id 'git' -Name 'Git' -Level 'recommended' -Ok ([bool]$git) `
     -Purpose 'Version history, GitHub (checks and automatic releases), and the system dictionary submodule in a git clone' `
     -Detail $gitDetail `
     -Fix $(if ($hasWinget) { 'After the user agrees, run: winget install --id Git.Git -e (then restart the terminal)' } else { 'Download from https://git-scm.com/download/win' })
-
-# --- Node.js ---------------------------------------------------------------------------
-$node = Get-Command node -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
-$nodeOk = $false
-$nodeDetail = 'not found'
-if ($node) {
-    $nodeDetail = (Invoke-DevkitProcess -FilePath $node.Source -Arguments @('--version') -TimeoutSeconds 30).StdOut.Trim()
-    $nodeOk = ($nodeDetail -match '^v(\d+)\.') -and ([int]$matches[1] -ge 20)
-    if (-not $nodeOk) { $nodeDetail += ' (version 20 or later is needed)' }
-}
-Add-DoctorItem -Id 'node' -Name 'Node.js 20+' -Level 'optional' -Ok $nodeOk `
-    -Purpose 'ukagaka-doc MCP server (offline search of UKADOC and YAYA Wiki)' `
-    -Detail $nodeDetail `
-    -Fix $(if ($hasWinget) { 'After the user agrees, run: winget install --id OpenJS.NodeJS.LTS -e (then restart the terminal)' } else { 'Download the LTS version from https://nodejs.org/' })
 
 # --- output ----------------------------------------------------------------------------
 $missingRequired = @($items | Where-Object { $_.level -eq 'required' -and -not $_.ok })
