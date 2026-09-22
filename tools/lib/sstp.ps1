@@ -2,6 +2,95 @@
 # Dot-source it after lib/common.ps1: . (Join-Path $PSScriptRoot 'lib/sstp.ps1')
 # Keep every tools/*.ps1 file ASCII-only and compatible with Windows PowerShell 5.1.
 
+# SSTP port of SSP when nothing else is given.
+$DevkitSspDefaultPort = 9801
+# Ports looked for the isolated SSP of tools/run-ssp.ps1. 9801, 9821 and 11000 are defaults of ukagaka programs.
+$DevkitSspIsolatedFirstPort = 9822
+$DevkitSspIsolatedLastPort = 10999
+
+# The isolated SSP that tools/run-ssp.ps1 started for this kit is recorded in a file under the temporary folder
+# (one per kit folder), so that the ghost folder stays clean and other scripts can find its port.
+function Get-DevkitSspSessionPath {
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try {
+        $bytes = $sha.ComputeHash($DevkitUtf8.GetBytes($DevkitRoot.ToLowerInvariant()))
+    } finally {
+        $sha.Dispose()
+    }
+    $hash = -join ($bytes[0..7] | ForEach-Object { $_.ToString('x2') })
+    return (Join-Path (Join-Path ([IO.Path]::GetTempPath()) 'ghost-devkit') "ssp-$hash.json")
+}
+
+function Get-DevkitProcessStartTicks([System.Diagnostics.Process]$Process) {
+    try { return $Process.StartTime.ToUniversalTime().Ticks } catch { return 0 }
+}
+
+# Returns the recorded isolated SSP (port, pid, startTicks, root, sspPath) while its process is alive, or $null.
+# A record whose process is gone (or whose process id was reused) is deleted.
+function Get-DevkitSspSession {
+    $path = Get-DevkitSspSessionPath
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { return $null }
+    $session = $null
+    try { $session = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json } catch { }
+    $alive = $false
+    if ($session) {
+        try {
+            $process = Get-Process -Id ([int]$session.pid) -ErrorAction Stop
+            $alive = (Get-DevkitProcessStartTicks $process) -eq [long]$session.startTicks
+        } catch { }
+    }
+    if ($alive) { return $session }
+    Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+    return $null
+}
+
+function Save-DevkitSspSession([System.Diagnostics.Process]$Process, [int]$Port, [string]$Root, [string]$SspPath) {
+    $path = Get-DevkitSspSessionPath
+    $dir = Split-Path $path -Parent
+    if (-not (Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    $session = [pscustomobject]@{ port = $Port; pid = $Process.Id; startTicks = (Get-DevkitProcessStartTicks $Process); root = $Root; sspPath = $SspPath }
+    [IO.File]::WriteAllText($path, ($session | ConvertTo-Json), $DevkitUtf8)
+}
+
+function Remove-DevkitSspSession {
+    Remove-Item -LiteralPath (Get-DevkitSspSessionPath) -Force -ErrorAction SilentlyContinue
+}
+
+# Port for the SSTP requests of a script: the -Port argument when given (greater than 0), otherwise the port of
+# the isolated SSP started by tools/run-ssp.ps1 while it runs, otherwise 9801.
+function Resolve-DevkitSspPort([int]$Port) {
+    if ($Port -gt 0) { return $Port }
+    $session = Get-DevkitSspSession
+    if ($session) { return [int]$session.port }
+    return $DevkitSspDefaultPort
+}
+
+# Tells whether nothing listens on a TCP port of the loopback addresses (IPv4, and IPv6 when available),
+# which SSP uses for "--sstp-listen <port>".
+function Test-DevkitTcpPortFree([int]$Port) {
+    $addresses = @([Net.IPAddress]::Loopback)
+    if ([Net.Sockets.Socket]::OSSupportsIPv6) { $addresses += [Net.IPAddress]::IPv6Loopback }
+    foreach ($address in $addresses) {
+        $listener = New-Object System.Net.Sockets.TcpListener($address, $Port)
+        try {
+            $listener.Start()
+        } catch {
+            return $false
+        } finally {
+            try { $listener.Stop() } catch { }
+        }
+    }
+    return $true
+}
+
+# Returns the first free port for the isolated SSP, or 0 when there is none.
+function Find-DevkitSspFreePort {
+    for ($port = $DevkitSspIsolatedFirstPort; $port -le $DevkitSspIsolatedLastPort; $port++) {
+        if (Test-DevkitTcpPortFree $port) { return $port }
+    }
+    return 0
+}
+
 # Sends one SSTP request to SSP on this PC. $Lines is the request without the final blank line.
 # Returns Connected, TimedOut, Raw, Status (0 when unknown), StatusLine, Headers and Data (the additional data).
 function Invoke-DevkitSstp {
@@ -78,10 +167,10 @@ function Get-DevkitSspGhostId([string]$GhostRoot, [string]$SakuraName, [int]$Por
     return $null
 }
 
-# Reads the state of the running ghost with "EXECUTE GetStatus" (SSP 2.8.94 or later). States are the same as the
+# Reads the state of the running ghost with "EXECUTE GetStatus". States are the same as the
 # SHIORI/3.0 Status header, for example talking, choosing, online, opening(input) or balloon(0=0).
 # Returns an object whose States is the list (empty when no state applies), or $null when SSP did not answer 200:
-# SSP is not running, it is older than 2.8.94, or the ghost is being loaded (SSP answers 400 meanwhile).
+# SSP is not running, or the ghost is being loaded (SSP answers 400 meanwhile).
 function Get-DevkitSspStatus([int]$Port = 9801) {
     $response = Invoke-DevkitSstp -Lines @('EXECUTE SSTP/1.1', 'Charset: UTF-8', 'Sender: ghost-devkit', 'Command: GetStatus') -Port $Port -TimeoutSeconds 5
     if ($response.Status -ne 200) { return $null }

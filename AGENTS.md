@@ -23,7 +23,8 @@ AI コーディングエージェント（Claude Code、Codex、GitHub Copilot�
 | 「セットアップして」「始めたい」「足りないものを入れて」 | `docs/agents/workflows/setup.md` |
 | 「チェックして」「エラーが出ていないか見て」「辞書のエラーを直して」 | `docs/agents/workflows/check.md` |
 | 「SSP で試して」「動かして見せて」「このトークを再生して」 | `docs/agents/workflows/try-in-ssp.md` |
-| 「nar を作って」「配布用のファイルを作って」「リリースしたい」 | `docs/agents/workflows/build-nar.md` |
+| 「シェルの画像を直して」「画像を編集して」「表情のパーツを作って」「32bit PNG にして」 | `docs/agents/workflows/edit-shell-image.md` |
+| 「nar を作って」「配布用のファイルを作って」「リリースしたい」「更新ファイルを作って」 | `docs/agents/workflows/build-nar.md` |
 | 「YAYA を更新して」「yaya.dll を更新して」「システム辞書を更新して」「yaya-dic を更新して」 | `docs/agents/workflows/update-yaya.md` |
 | 「開発キットを更新して」「別のゴーストにキットを入れて」 | `docs/agents/workflows/update-devkit.md` |
 | 「自分のゴーストを作りたい」「テンプレートから独立させたい」 | `docs/agents/workflows/new-ghost.md` |
@@ -43,13 +44,13 @@ AI コーディングエージェント（Claude Code、Codex、GitHub Copilot�
 
 ## 作業のルール
 
-1. **辞書や `ghost/master/*.txt` を変更したら、必ず `tools/check-dic.ps1` を通す。** エラーが残ったゴーストは緊急モードで起動し、ほとんど話さなくなる。`shell/` を変更したら `tools/check-shell.ps1` も通す。辞書の関数を書いたり直したりしたら、`tools/shiori.ps1 -Eval '関数名'` で呼び出して、返すスクリプトと、実行時のエラー（存在しない関数の呼び出しなど。読み込みのチェックでは見つからない）も確かめる（ファイルの書き込みや外部プログラムの実行をする関数は本当に動くので、中身を読んでから呼ぶ）。SSP で動かして確かめるときは、`tools/sstp.ps1` や `tools/run-ssp.ps1` が表示する SSP のエラーログ（終了コード 2）も見る。SSP 2.8.94 以降では、書いたトークを `tools/sstp.ps1 -Script` や `-Event` で再生すると、解釈できなかったタグが `[GHOST/Script]` のエラーとして出るので、それも直す。
+1. **辞書や `ghost/master/*.txt` を変更したら、必ず `tools/check-dic.ps1` を通す。** エラーが残ったゴーストは緊急モードで起動し、ほとんど話さなくなる。`shell/` を変更したら `tools/check-shell.ps1` も通す。辞書の関数を書いたり直したりしたら、`tools/shiori.ps1 -Eval '関数名'` で呼び出して、返すスクリプトと、実行時のエラー（存在しない関数の呼び出しなど。読み込みのチェックでは見つからない）も確かめる（ファイルの書き込みや外部プログラムの実行をする関数は本当に動くので、中身を読んでから呼ぶ）。SSP で動かして確かめるときは、`tools/sstp.ps1` や `tools/run-ssp.ps1` が表示する SSP のエラーログ（終了コード 2）も見る。書いたトークを `tools/sstp.ps1 -Script` や `-Event` で再生すると、解釈できなかったタグが `[GHOST/Script]` のエラーとして出るので、それも直す。
 2. 仕様（さくらスクリプトのタグ、SHIORI イベントの名前と Reference、YAYA の関数、descript.txt や surfaces.txt の項目）を**推測で書かない**。確かでないときは「仕様の調べ方」に従って確かめる。
 3. 文字コードは UTF-8（BOM なし）、改行は LF、辞書のインデントはタブ（`.editorconfig` 参照）。ただし `readme-aya.txt` と `readme-yaya.txt` は Shift_JIS なので、文字コードを変えない。
 4. 編集しないもの: `ghost/master/dic/system/` または `ghost/master/system/`（システム辞書。submodule のことも普通のファイルのこともある。変更が必要なら上流の yaya-dic に提案する）、`yaya.dll`、実行時に作られるファイル。yaya.dll とシステム辞書の更新は `docs/agents/workflows/update-yaya.md` の手順で行う。
 5. 開発キットのファイル（`docs/agents/devkit-files.md` の表）は、頼まれない限り変えない。`tools/` に自分のスクリプトを足すときは、Windows PowerShell 5.1 でも動くように書き、**ASCII 文字だけで書く**（BOM のないファイルに日本語を書くと 5.1 で文字化けするため）。
 6. 既存のトークや作者が書いた台詞を、頼まれていないのに大量に書き換えたり消したりしない。未使用の関数や変数が見つかっても、報告するだけにする。
-7. シェルの画像は、`GHOST.md` でライセンスを確かめるまで編集しない（改変を禁じているシェルがある）。
+7. シェルの画像は、`GHOST.md` でライセンスを確かめるまで編集しない（改変を禁じているシェルがある）。画像の編集には `tools/image.ps1` を使う（書き出すのは 32bit RGBA PNG。手順は `docs/agents/workflows/edit-shell-image.md`）。
 8. アプリのインストール、SSP へのゴーストのインストール、yaya.dll や開発キットの更新、リリース、ネットワーク更新ファイルのアップロードなど、手元のファイル編集を超える操作は、作者の確認を取ってから行う。
 
 ## YAYA 辞書の書き方の要点
@@ -74,7 +75,7 @@ AI コーディングエージェント（Claude Code、Codex、GitHub Copilot�
 
 間の取り方、改行の入れ方、話し手の交代などの決まりと例は、`GHOST.md` の「トークの書き方」にある。どのゴーストにも共通すること:
 
-- 話し始める側のスコープ（`\0` / `\h`、`\1` / `\u`）と表情（`\s[番号]`）を最初に指定する。サーフェス番号は `GHOST.md` の表にあるものだけを使う。
+- 話し始める側のスコープ（`\0` / `\h`、`\1` / `\u`）と表情（`\s[番号]`）を最初に指定する。サーフェス番号は `GHOST.md` の表にあるものだけを使う。表の説明だけでは台詞に合う表情を選びにくいときは、画像を読めるなら `tools/dump-surface.ps1 -Surface 0-7 -Backlog -Sheet` で顔を並べて見比べる（出力は一時フォルダに置き、ゴーストのフォルダには置かない）。
 - `\w1` はおよそ 50 ミリ秒の待ち、`\n` は改行、トークの最後は `\e`。
 
 AI がやりがちな失敗:

@@ -7,7 +7,7 @@
     By default only the entries of this ghost are shown: SSP records the name of ghost/master/descript.txt
     (not sakura.name) as their source. Use -All to include every source, such as [SYSTEM].
       error   : dictionary errors reported by YAYA, shell (SERIKO) problems, ... (type: Info, Notice,
-                Warning, Error, Critical or System). With SSP 2.8.94 or later, SERIKO entries tell the file
+                Warning, Error, Critical or System). SERIKO entries tell the file
                 and line ("shell/master/surfaces.txt:Line=123"), and tags that SSP could not interpret in
                 scripts played by tools/sstp.ps1 (Option: strict) are logged as "[GHOST/Script] ...".
       script  : the scripts that were played (type: the event or SSTP request that caused it)
@@ -15,6 +15,7 @@
       update  : network update messages
     Exit codes: 0 = read, and no Error or Critical entry was shown, 1 = this SSP has no developer.log
     properties, 2 = an Error or Critical entry was shown, 3 = could not connect (SSP is not running).
+    While the isolated SSP started by tools/run-ssp.ps1 runs, its logs are read unless -Port is given.
 .EXAMPLE
     powershell -NoProfile -ExecutionPolicy Bypass -File tools/ssp-log.ps1
 .EXAMPLE
@@ -34,12 +35,14 @@ param(
     [int]$Max = 50,
     # Print the result as JSON (for agents).
     [switch]$Json,
-    [int]$Port = 9801
+    # SSTP port (default: the isolated SSP started by tools/run-ssp.ps1 while it runs, otherwise 9801).
+    [int]$Port = 0
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'lib/common.ps1')
 . (Join-Path $PSScriptRoot 'lib/sstp.ps1')
 Initialize-DevkitConsole
+$Port = Resolve-DevkitSspPort $Port
 
 if ($All) {
     $Name = $null
@@ -49,7 +52,7 @@ if ($All) {
 
 $log = Get-DevkitSspLog -Kind $Kind -Name $Name -Max $Max -Port $Port
 if ($log.State -eq 'offline') {
-    Write-Host "ssp-log: could not connect to 127.0.0.1:$Port. Is SSP running?"
+    Write-Host "ssp-log: could not connect to 127.0.0.1:$Port. Is SSP running? (start it with tools/run-ssp.ps1)"
     exit 3
 }
 if ($log.State -eq 'unsupported') {
