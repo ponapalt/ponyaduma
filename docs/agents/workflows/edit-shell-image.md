@@ -18,10 +18,11 @@
 2. 今の状態を調べる。
    - `powershell -NoProfile -ExecutionPolicy Bypass -File tools/image.ps1 info 'shell/master/*.png'` で、各画像の大きさ、透過の持ち方（パレット、RGBA、`.pna` など）、SSP で何が透過になるかを見る。
    - `shell/master/surfaces.txt` を読み、直したい画像がどのサーフェスのどこに使われているか（`element`、`animation` のパターン、その座標）を確かめる。1 枚のパーツが複数のサーフェスで使われていることがある。
-   - 合成された姿は `tools/dump-surface.ps1 -Surface <番号>`、当たり判定は `-Collision` を付けて見る。
+   - 合成された姿は `tools/dump-surface.ps1 -Surface <番号>`、当たり判定は `-Collision` を付けて見る。着せ替え（`bindgroup`）のあるシェルでは、`-Bind 'カテゴリ,パーツ'` で着せ替えた姿を、`animation` のパーツは `-Animation <ID> -Sheet` でコマごとに並べて見る。
 3. 作業は一時フォルダで行い、確かめながら進める。
    - 位置を決めるときは `tools/image.ps1 view <ファイル> -Rect x,y,w,h -Zoom 8` で拡大し、目盛りの座標を読む。作業前と作業後を並べて渡すと見比べられる。
    - 表情などの差分パーツは、`diff <元> <変えた後> -Part <パーツ.png>` で違う画素だけを切り出せる。表示された位置が、`element` / `animation` に書く座標になる。
+   - パーツを作ったら `info <パーツ> -Base <下の画像> -Offset x,y` で調べる。島が 2 つ以上あれば、離れた小さな島（アルファ 1 の 1 ドットなど）が切り出しの残りでないか見る。下の透明な所へのはみ出しや、半透明で色を混ぜている縁も表示される。
    - 1 回の `edit` で複数の操作を順に当てられる。操作の一覧は `docs/agents/commands.md` の「画像の編集」。
 4. 透過の扱いを決める。`tools/image.ps1` の出力はすべて 32bit RGBA PNG なので、SSP にアルファを使わせる設定が要る。
    - シェルの `descript.txt` に `seriko.use_self_alpha,1` が無ければ、足すことを作者に提案する。無いままだと、SSP はアルファを無視して左上の画素の色で抜く（完全に透明な画素は黒く出る）。
@@ -31,9 +32,13 @@
    - 画像の大きさや位置を変えたら、`surfaces.txt` の `collision`、`element` と `animation` の座標、`descript.txt` の吹き出しの位置など、座標を使う設定も合わせる。書式は推測で書かずに調べる（`AGENTS.md` の「仕様の調べ方」）。
 6. 確かめる。
    - `tools/check-shell.ps1` を通す。
-   - `tools/dump-surface.ps1 -Surface <番号>` で、SSP が合成した姿を見る（当たり判定を動かしたなら `-Collision` も）。`element` の抜けや位置のずれは、チェックが通っても見つからない。
-   - SSP で動かしているなら、`tools/sstp.ps1 -Reload shell` で読み込み直し、`tools/sstp.ps1 -Script '\0\s[<番号>]\e'` で表示する。
+   - `tools/dump-surface.ps1 -Surface <番号>` で、SSP が合成した姿を見る（当たり判定を動かしたなら `-Collision` も、着せ替えのパーツを直したなら `-Bind` でそれを着せた姿も）。`element` の抜けや位置のずれは、チェックが通っても見つからない。
+   - `animation` のパーツ（まばたき、口パクなど）を直したなら、`tools/dump-surface.ps1 -Surface <番号> -Animation <ID> -Sheet` で、コマごとの姿を並べて見る。パターンの座標のずれや、コマの間のちらつきは、1 枚の合成では分からない。
+   - git で管理しているなら、`tools/dump-surface.ps1 -Surface <番号の範囲> -Compare HEAD` で作業前と比べる（`-Animation` や `-Bind` を付ければ、コマごと、着せ替えた姿でも比べられる）。直したサーフェスでは違う範囲が直した場所だけに収まっていること、ほかのサーフェスは `identical` であることを確かめる。範囲の外に違いがあれば、`compare-<名前>.png` で見る。
+   - 仕上がりの画像を `tools/image.ps1 view <ファイル> -Background white,black,faint` で見る。白い縁は黒の上で、透けた穴は白の上で、ほとんど見えない画素は `faint` で見つかる。
+   - SSP で見せるなら、`tools/run-ssp.ps1` で試験用 SSP を立ててから（動いていれば `tools/sstp.ps1 -Reload shell` で読み込み直して）、`tools/sstp.ps1 -Script '\0\s[<番号>]\e'` で表示する。
 7. 変えた画像、足した設定、消したファイルをまとめて報告する。作業前と作業後を `view` で並べた画像のパスも伝え、見た目の最終判断は作者にしてもらう。
+   - 伺かの作者は、1 ドットの違い、わずかな位置のずれ、目に見えないほど薄い画素まで気にして直すことが多い。「見た目では分からない」と自分で判断して省かず、手順 6 で見つかった小さな違い（範囲の外の違い、離れた島、はみ出し、継ぎ目）も、位置と数を添えて報告する。直すかどうかは作者が決める。
 
 ## 関連
 

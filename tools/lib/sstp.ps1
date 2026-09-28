@@ -140,6 +140,14 @@ function Invoke-DevkitSstp {
 # the security limits for other programs and silently ignores things such as \![reload,ghost].
 # The ghost is matched by ghostpath (GhostRoot) first, then by name (SakuraName). Returns $null when not found.
 function Get-DevkitSspGhostId([string]$GhostRoot, [string]$SakuraName, [int]$Port = 9801) {
+    $ghost = Get-DevkitSspGhost -GhostRoot $GhostRoot -SakuraName $SakuraName -Port $Port
+    if ($ghost) { return $ghost.Id }
+    return $null
+}
+
+# Same search as Get-DevkitSspGhostId. Returns Id and Fields (the FMO entries of the ghost, such as name,
+# ghostpath (the root folder that contains ghost/ and shell/) and hwnd), or $null when not found.
+function Get-DevkitSspGhost([string]$GhostRoot, [string]$SakuraName, [int]$Port = 9801) {
     $response = Invoke-DevkitSstp -Lines @('EXECUTE SSTP/1.1', 'Charset: UTF-8', 'Sender: ghost-devkit', 'Command: GetFMO') -Port $Port -TimeoutSeconds 10
     if ($response.Status -ne 200) { return $null }
     # Each line is "<32-byte identifier>.<key><byte 1><value>".
@@ -156,12 +164,12 @@ function Get-DevkitSspGhostId([string]$GhostRoot, [string]$SakuraName, [int]$Por
         $root = $GhostRoot.TrimEnd('\', '/')
         foreach ($id in $ghosts.Keys) {
             $path = [string]$ghosts[$id]['ghostpath']
-            if ($path -and $path.TrimEnd('\', '/') -ieq $root) { return $id }
+            if ($path -and $path.TrimEnd('\', '/') -ieq $root) { return [pscustomobject]@{ Id = $id; Fields = $ghosts[$id] } }
         }
     }
     if ($SakuraName) {
         foreach ($id in $ghosts.Keys) {
-            if ($ghosts[$id]['name'] -ceq $SakuraName) { return $id }
+            if ($ghosts[$id]['name'] -ceq $SakuraName) { return [pscustomobject]@{ Id = $id; Fields = $ghosts[$id] } }
         }
     }
     return $null
@@ -180,7 +188,7 @@ function Get-DevkitSspStatus([int]$Port = 9801) {
 # Waits until the ghost has finished talking, with GetStatus. SSP answers SEND and NOTIFY before it plays the
 # script, and it logs script errors (Option: strict) while playing, so the error log is complete only afterwards.
 # Waits up to StartSeconds for the talk to start (a script with nothing to play never shows "talking"), then up
-# to TimeoutSeconds in all. Returns done, timeout (still talking, for example waiting for a click) or unsupported
+# to TimeoutSeconds in all. Returns done, timeout (still talking, for example waiting for a click) or nostatus
 # (GetStatus did not answer; the caller should fall back to a fixed wait).
 function Wait-DevkitSspTalkEnd([double]$StartSeconds = 1, [int]$TimeoutSeconds = 60, [int]$Port = 9801) {
     $start = Get-Date
@@ -189,7 +197,7 @@ function Wait-DevkitSspTalkEnd([double]$StartSeconds = 1, [int]$TimeoutSeconds =
         $status = Get-DevkitSspStatus $Port
         if ($null -eq $status) {
             if ($talked) { return 'done' }
-            return 'unsupported'
+            return 'nostatus'
         }
         $elapsed = ((Get-Date) - $start).TotalSeconds
         if ($status.States -contains 'talking') {
@@ -237,7 +245,7 @@ function Get-DevkitSspLogKey([object]$Entry) {
 # Reads the newest entries of an SSP log (developer.log.<Kind>; SSP keeps about 50 of each).
 # Kind: script, error, network or update. Name: only entries whose source (a ghost name, [SYSTEM], ...) matches.
 # Since: a marker from New-DevkitSspLogMarker; only the entries added after the marker are returned.
-# Returns State (ok / offline / unsupported), Total, Entries (newest first: index, type, name, time, value),
+# Returns State (ok / offline / unreadable), Total, Entries (newest first: index, type, name, time, value),
 # Truncated (more entries than Max) and MarkerLost (the marked entry is gone, so older entries may be included).
 function Get-DevkitSspLog {
     param(
@@ -257,7 +265,7 @@ function Get-DevkitSspLog {
         return $log
     }
     if ($response.Status -lt 200 -or $response.Status -ge 300 -or $response.Data.Trim() -notmatch '^\d+$') {
-        $log.State = 'unsupported'
+        $log.State = 'unreadable'
         return $log
     }
     $log.Total = [int]$response.Data.Trim()
@@ -296,7 +304,7 @@ function Get-DevkitSspLog {
 }
 
 # Remembers the newest entry of an SSP log, to read only the entries added later (Get-DevkitSspLog -Since).
-# Returns $null when the log cannot be read (SSP is not running, or it does not support developer.log).
+# Returns $null when the log cannot be read (SSP is not running, or it did not answer the log properties).
 function New-DevkitSspLogMarker([string]$Kind = 'error', [string]$Name, [int]$Port = 9801) {
     $log = Get-DevkitSspLog -Kind $Kind -Name $Name -Max 1 -Port $Port
     if ($log.State -ne 'ok') { return $null }

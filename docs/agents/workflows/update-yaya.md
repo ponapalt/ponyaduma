@@ -2,7 +2,7 @@
 
 ## 使うとき
 
-作者が「YAYA を更新して」「YAYA を新しくして」「yaya.dll を更新して」「システム辞書を更新して」「yaya-dic を更新して」「SHIORI を最新に」と言ったとき。
+作者が「YAYA を更新して」「YAYA を新しくして」「yaya.dll を更新して」「システム辞書を更新して」「yaya-dic を更新して」「SHIORI を最新に」「YAYA のベータ版（600 系）にして」と言ったとき。
 
 **作者にはっきり頼まれたときだけ行う。自分から始めない。** GitHub からのダウンロードと、yaya.dll やシステム辞書のファイルの置き換えを伴う。
 
@@ -16,7 +16,11 @@ yaya.dll（YAYA 本体）とシステム辞書（[yaya-dic](https://github.com/Y
 
 ## tools/update-yaya.ps1 がすること
 
-- yaya.dll: yaya-shiori のリリースの `yaya.zip` から取る（最新リリース、または `-Tag`）。
+- yaya.dll: yaya-shiori のリリースの `yaya.zip` から取る（または `-Tag` で指定した版）。
+  - YAYA は 500 系と 600 系を並行してリリースしている（今は 500 系が正式版、600 系がベータ版（pre-release））。正式版かベータ版かに関わらず、**手元の yaya.dll と同じ系列**の、いちばん新しい版を取る（出力の `series`）。500 系のゴーストは 500 系のまま、600 系のゴーストは 600 系のまま更新される。
+  - 手元より新しい系列が出ていれば、`newer` の行で知らせるだけで、上げない。系列を切り替えるのは `-Series 6`（600 系へ）や `-Series 5`（500 系へ）を付けたときだけ。
+  - yaya.dll が無いとき（または、手元の系列のリリースが見つからないとき）は、最新の正式版の系列を取る。
+  - 手元の yaya.dll より古い版は、`-Tag`、`-Series`、`-Force` のどれかを付けないかぎり入れない（`the release is older than the current yaya.dll` と出て、yaya.dll はそのまま）。
 - システム辞書: yaya-dic にはリリースもタグも無いので、既定のブランチの最新のコミットを取る。`ghost/master/dic/system/`、`ghost/master/system/` の順に、今の yaya-dic の構成（`yaya_base/shiori3.dic` がある）のフォルダを探し、その形によって次のように動く。
 
 | システム辞書のフォルダ | 動作 |
@@ -31,10 +35,10 @@ yaya.dll（YAYA 本体）とシステム辞書（[yaya-dic](https://github.com/Y
 
 ## 手順
 
-1. 確認だけを行う（GitHub からダウンロードすることを一言伝える。作者が YAYA のタグを指定したときだけ `-Tag <タグ>` を付ける）:
+1. 確認だけを行う（GitHub からダウンロードすることを一言伝える。作者が YAYA のタグを指定したときだけ `-Tag <タグ>` を付ける。作者が系列の切り替えを望んだとき（「600 系にして」「ベータ版にして」なら `-Series 6`、「500 系に戻して」「正式版に戻して」なら `-Series 5`）だけ `-Series` を付ける）:
    `powershell -NoProfile -ExecutionPolicy Bypass -File tools/update-yaya.ps1 -DryRun`
    次を短くまとめて伝える。
-   - yaya.dll: 今の版（`current`）と更新先（`release`）
+   - yaya.dll: 今の版（`current`）と更新先（`release`）。`newer` の行があれば、新しい系列が出ていること（切り替えるかは作者が決める。600 系はベータ版なので、互換性に関わる変更があるかもしれない）
    - システム辞書: 場所、形（`kind`）、今の版と最新（`current` / `latest`）。普通のファイルなら `update` / `create` / `CONFLICT` / `extra` の行
 2. 終了コードが 2 なら、出力に応じて先に片付ける。
    - `another layout than yaya-dic`: 古い構成。下の「古い構成のシステム辞書を再編する」へ進む。
@@ -55,7 +59,7 @@ yaya.dll（YAYA 本体）とシステム辞書（[yaya-dic](https://github.com/Y
    - `tools/check-dic.ps1` はスクリプトが実行済み。加えて `tools/shiori.ps1 -Eval '1+2'` が `3` を返すことを確かめる（システム辞書の `??` の処理を通る）。
    - 作者が SSP で試したいと言えば、`docs/agents/workflows/try-in-ssp.md` の手順で起動する。
 8. 変わったことを伝える。
-   - yaya.dll: 出力の `notes` のリリースノートを読み、互換性に関わる変更があれば要約する。
+   - yaya.dll: 出力の `notes` のリリースノートを読み、互換性に関わる変更があれば要約する。ベータ版（`release` に `(pre-release)` と出る）を入れたときは、そのことも伝える。
    - システム辞書: git なら出力の `changes` の URL、普通のファイルなら `history` の URL のコミット一覧（手元がどの版だったかは分からないので、`update` になったファイルに関わる最近のもの）を読み、主な変更を要約する。
 9. git の作業コピーなら、変更をコミットするか聞く（勝手にコミットしない）。submodule を更新したときは、ゴーストのリポジトリで submodule のフォルダ（例: `ghost/master/dic/system`）の変更をコミットしないと、新しい版が記録されない。
 
