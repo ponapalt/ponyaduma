@@ -43,7 +43,14 @@ updates2.dau
 updates.txt
 *.nar
 
-# leftovers of a YAYA system dictionary update, and manuals only for developing (not needed at runtime)
+# git metadata (ghost/master/dic/system is a submodule in the repository, but plain files in the nar)
+/.gitmodules
+
+# leftovers of a YAYA system dictionary update, and files of the system dictionary repository
+# that are only for developing (not needed at runtime)
 *.yaya-dic-new
 /ghost/master/dic/system/docs/
+/ghost/master/dic/system/.github/
+/ghost/master/dic/system/.vscode/
+/ghost/master/dic/system/.gitattributes
 /ghost/master/yayalint_config.lua

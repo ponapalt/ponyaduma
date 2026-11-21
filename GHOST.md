@@ -32,7 +32,10 @@
   - `include, lilith_config.txt` → `aya_lilith_config.dic`、`aya_lilith_ex_config.dic`、`dicdir, dic/system/aya_lilith`
   - `dicdir, dic/normal`（このゴーストのトークと処理。ここを書く）
 - 緊急モード: `ghost/master/dic/emerg/`（`yaya_emerg_dic.dic`、`yaya_homeurl.dic`）。辞書にエラーがあるとここだけが読まれる。
-- システム辞書（`ghost/master/dic/system/`）: yaya-dic とあやりりす。**編集しない**（更新はスキル `ukagaka-developer` の `references/yaya/update.md` の手順で行う）。
+- システム辞書（`ghost/master/dic/system/`）: yaya-dic とあやりりす。yaya-dic の **git submodule**（`.gitmodules`。ほかのゴーストと揃えている）。**サブモジュールの中は編集しない**（更新はスキル `ukagaka-developer` の `references/yaya/update.md` の手順で行う。更新したら、ゴースト側で `ghost/master/dic/system` の変更をコミットして、新しい版を記録する）。
+  - あやりりすは、yaya-dic の `_loading_order.txt`（`# dicdir, aya_lilith` を有効にする方法）を使わず、ゴースト側の `lilith_config.txt` が `dicdir, dic/system/aya_lilith` を読むことで有効にしている。設定は `ghost/master/aya_lilith_config.dic` と `aya_lilith_ex_config.dic`（どちらもサブモジュールの外）。
+  - nar と更新ファイルには、サブモジュールの中身が普通のファイルとして入る。yaya-dic の開発用のファイル（`.github/`、`.vscode/`、`.gitattributes`、`docs/`）と `.gitmodules` は `.narignore` で除外している。
+  - clone するときは `git clone --recursive`（または `git submodule update --init`）。GitHub の「Download ZIP」にはサブモジュールの中身が入らない。
 - 文字コードはすべて UTF-8。
 
 ## イベントと辞書ファイルの対応

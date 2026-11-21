@@ -1,2 +1,0 @@
-dic, aya_lilith.dic, UTF-8
-dicif, aya_lilith_ex.dic, UTF-8
