@@ -4,3 +4,9 @@ shell/master/profile
 shell/master/_cache.spx
 WORK/transparent/_cache.spx
 /ponyaballoon/profile
+
+# 配布物（.github/scripts/build-site.ps1 が作る）。旧 homeurl 用に追跡している updates2.dau / updates.txt は git add -f 済み
+updates2.dau
+updates.txt
+*.nar
+/build/

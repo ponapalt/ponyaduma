@@ -1,24 +1,11 @@
+# Files excluded when creating the .nar (gitignore syntax).
+# Used by SSP, by build-nar.ps1 of ukagaka-developer and by .github/scripts/build-site.ps1.
+# .updateignore includes this file.
+# https://ssp.shillest.net/ukadoc/manual/descript_install.html
+
 WORK/
 tamac.exe
-CLAUDE.md
-.claude/
-.github/
-.git/
-.gitignore
 ghost/master/yaya_variable.cfg
-
-# 旧 AI 開発キットの除外（移行後は該当ファイルなし。残っていても害はない）
-AGENTS.md
-GHOST.md
-DEVKIT-GUIDE.md
-.mcp.json
-.editorconfig
-.gitattributes
-docs/
-tools/
-*.devkit-new
-*.yaya-dic-new
-ghost/master/yayalint_config.lua
 
 # files for developing the ghost with ukagaka-developer (not shipped in the nar or in network updates)
 /AGENTS.md
@@ -29,13 +16,34 @@ ghost/master/yayalint_config.lua
 /.agents/
 /build/
 
+# balloon images of sstp.ps1 -Balloon, left only when the script was stopped midway
+/ghost/master/devkit-balloon-*/
+
 # files of the repository (git, editor, GitHub); the nar does not need them
 /.github/
+/.git/
 /.gitignore
 /.gitattributes
 /.editorconfig
+
+# these two files themselves; only in the repository
 /.narignore
 /.updateignore
 
-# balloon images of sstp.ps1 -Balloon, left only when the script was stopped midway
-/ghost/master/devkit-balloon-*/
+# metainfo for web applications (metainfo-standard) and the introduction page for GitHub Pages;
+# .github/scripts/build-site.ps1 publishes them on its own
+/.ukagaka/
+/site/
+
+# needed only by network updates (.updateignore includes it again)
+/delete.txt
+
+# network update files (made by .github/scripts/build-site.ps1; the ones in the repository are for the old homeurl)
+updates2.dau
+updates.txt
+*.nar
+
+# leftovers of a YAYA system dictionary update, and manuals only for developing (not needed at runtime)
+*.yaya-dic-new
+/ghost/master/dic/system/docs/
+/ghost/master/yayalint_config.lua

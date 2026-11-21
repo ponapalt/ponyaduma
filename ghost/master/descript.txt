@@ -4,7 +4,7 @@ type,ghost
 craftman,SSP BUGTRAQ
 craftmanw,ばぐとら研究所
 craftmanurl,https://github.com/ponapalt/ponyaduma
-homeurl,https://raw.githubusercontent.com/ponapalt/ponyaduma/master/
+homeurl,https://ponadocs.shillest.net/ponyaduma/
 sakura.name,ぽにゃづま
 kero.name,連装蟲ゅう
 

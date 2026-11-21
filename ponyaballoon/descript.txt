@@ -6,7 +6,7 @@ id,ponyaballoon
 craftman,SSP BUGTRAQ
 craftmanw,ばぐとら研究所
 craftmanurl,https://github.com/ponapalt/ponyaduma
-homeurl,https://raw.githubusercontent.com/ponapalt/ponyaduma/master/ponyaballoon/
+homeurl,https://ponadocs.shillest.net/ponyaduma/ponyaballoon/
 
 origin.x,17
 origin.y,6

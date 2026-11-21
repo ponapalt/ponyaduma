@@ -10,7 +10,10 @@
 - 作者: SSP BUGTRAQ（ばぐとら研究所）
 - 配布先・ネットワーク更新の URL:
   - リポジトリ: https://github.com/ponapalt/ponyaduma
-  - ネットワーク更新（`homeurl`）: https://raw.githubusercontent.com/ponapalt/ponyaduma/master/
+  - ネットワーク更新（`homeurl`）: https://ponadocs.shillest.net/ponyaduma/（GitHub Pages。独自ドメインで、`ponapalt.github.io/ponyaduma/` はここへ転送される）。`On_homeurl` は `ghost/master/dic/normal/string.txt` と `ghost/master/dic/emerg/yaya_homeurl.dic`、`homeurl` は `ghost/master/descript.txt`。バルーン `ponyaballoon/` の `homeurl` は `https://ponadocs.shillest.net/ponyaduma/ponyaballoon/`。
+  - 旧 homeurl（`https://raw.githubusercontent.com/ponapalt/ponyaduma/master/`）を使う利用者のために、`updates2.dau` と `updates.txt`（ルートと `ponyaballoon/`）を**凍結したファイル**としてリポジトリに置いている。
+    - 載せているのは、新しい homeurl を運ぶファイル（`ghost/master/dic/normal/string.txt`、`ghost/master/dic/emerg/yaya_homeurl.dic`、バルーンの `descript.txt`）と `delete.txt` だけ。
+    - 消さず、作り直さない（`.gitignore` の対象なので `git add -f` で追加してある）。載せたファイルを変えると MD5 が合わなくなるので、旧 homeurl の利用者が移り終えるまで、この 4 ファイルは変えない（変えるときは、凍結ファイルの MD5 と size も合わせて直す）。
 - 元にしたテンプレートやゴースト: YAYA ゴーストテンプレート（あやりりす／あやりりす EX を組み込んだもの）
 - 位置づけ: SSP 作者「ぽな」の自己パロディゴースト。トークの多くを AI エージェントとの対話で書く「伺か Vibe Coding」の実験台でもある。
 - バルーン: `ponyaballoon/`（同梱）
@@ -345,5 +348,10 @@ EX ヘッダの設定（`ghost/master/aya_lilith_ex_config.dic`）:
 
 ### リリース
 
-- `.nar` の作成とリリースは GitHub Actions（`.github/workflows/release.yml` と `release_ghost.py`）で全自動。`delete.txt` と `updates2.dau` もそこで更新される。
-- スキルの `scripts/build-nar.ps1` は、手元で `.nar` を確かめたいときに使う。リリース手順そのものは上の Actions が正。
+- 配布物は `.github/workflows/auto_deploy.yml` が作る。辞書チェック（`auto check`）が通った `master` の push ごとに、`.github/scripts/build-site.ps1` が nar（`.narignore` で除外したもの以外）と、ネットワーク更新ファイル（`updates2.dau` と `updates.txt`。`.updateignore` で除外したもの以外）を作り、GitHub Pages（上の `homeurl`）へ出す。ゴーストとバルーン `ponyaballoon/` は、別々の更新ファイルになる。
+- nar は GitHub Releases にも置く。タグ `latest` の Release 1 件だけを持ち、デプロイのたびに作り直す。固定の URL は `https://github.com/ponapalt/ponyaduma/releases/latest/download/ponyaduma.nar`。
+- リポジトリの Settings > Pages > Build and deployment > Source を「GitHub Actions」にしておくこと。
+- 手元でも `pwsh ./.github/scripts/build-site.ps1`（`-ListOnly` で一覧だけ）で同じものを `build/site` に作れる。
+- `delete.txt` は自動で作られない。配布から外したファイル（消したファイル、`.narignore` / `.updateignore` で除外に加えたファイル）は、手で `delete.txt` に足す（パスは `/` 区切り）。
+- `.ukagaka/`（metainfo）はまだ無い。付けるときは `references/workflows/metainfo.md`。`.ukagaka/` は先頭が `.` のフォルダなので、`auto_deploy.yml` の `actions/upload-pages-artifact` は v3 のままにする（v4 は隠しファイルを含めない）。
+- スキルの `scripts/build-nar.ps1` は、手元で `.nar` だけを確かめたいときに使う。

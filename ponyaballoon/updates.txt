@@ -1,0 +1,2 @@
+charset,UTF-8
+file,descript.txt24153687a02583e7284ec15d6e2882f2size=1484date=2026-11-21T11:07:18charset=UTF-8

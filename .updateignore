@@ -1,23 +1,11 @@
-WORK/
-tamac.exe
-CLAUDE.md
-.claude/
-.github/
-.git/
-.gitignore
-ghost/master/yaya_variable.cfg
-ponyaballoon/
+# Files excluded when creating network update files (updates2.dau), gitignore syntax.
+# Starts from the .narignore rules; later lines can add or re-include files.
+include:.narignore
 
-# 開発用ファイル（旧 AI 開発キットの分を含む。ネットワーク更新に載せない）
-.agents/
-AGENTS.md
-GHOST.md
-DEVKIT-GUIDE.md
-.mcp.json
-.editorconfig
-.gitattributes
-docs/
-tools/
-*.devkit-new
-*.yaya-dic-new
-ghost/master/yayalint_config.lua
+# delete.txt is needed by network updates
+!/delete.txt
+
+# The balloon that comes with the nar is installed to balloon/ by SSP; a network update would only
+# put its files into a folder inside the ghost folder. It has its own update files (homeurl in its
+# descript.txt), which .github/scripts/build-site.ps1 makes from install.txt.
+/ponyaballoon/
