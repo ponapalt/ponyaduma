@@ -22,6 +22,7 @@
 12. [配列ユーティリティ関数](#12-配列ユーティリティ関数)
 13. [疑似イベント](#13-疑似イベント)
 14. [付録：config.dic の主要設定](#付録configdic-の主要設定)
+    - [付録：AIグラフの既定値（`On_getaistate`）](#付録aiグラフの既定値on_getaistate)
 
 ### optional.dic
 
@@ -136,11 +137,26 @@ _result = FUNCTIONEX('kawari8.dll', 'こんにちは')
 // 追加の戻り値は valueex[0], valueex[1], ... で参照
 ```
 
+#### ベースウェアの内蔵モジュール（SAORI over DirectSSTP）
+
+`_argv[0]` が `internal_` で始まるとき（`internal_crypto`、`internal_time.dll` など。大文字小文字は区別せず、末尾の `.dll` は付いていてもよい）は、DLLを読み込まず、`DIRECTSSTP` でベースウェア（SSP 2.9.13以降）の内蔵モジュールを呼びます。書き方、戻り値、`valueex`、`LIB.STATUSCODE` は、DLLのSAORIと同じです。モジュールと関数は [SAORI over DirectSSTP](https://ssp.shillest.net/ukadoc/manual/spec_saori_ex.html) を参照してください。
+
+```
+_hash = FUNCTIONEX('internal_crypto', 'Digest', 'sha256', 'abc')
+_text = FUNCTIONEX('internal_time', 'Format', 0, '%Y/%m/%d', '--tz=+09:00')
+```
+
+- そのモジュールが使えないとき（旧SSP、SSP以外のベースウェア、知らないモジュール）は `0` を返します。使えるかどうかは、モジュールごとに最初の1回だけ `GET Version SAORI/1.0` で確かめて覚えます。ゴーストの窓（`SHIORI3FW.HWnd[0]`）がまだ分からない起動直後は、覚えずに `0` を返します。
+- 失敗したとき（400、500）の `Result` は空で、`LIB.STATUSCODE` に `400 Bad Request` などが入ります。失敗の理由（`ErrorDescription`）は `var.lib.key` / `var.lib.value` から読めます。
+- 引数に改行（CR・LF）が含まれるときは、ヘッダを書き足せてしまうので送らず、`0` を返します。改行や前後の空白を含むデータは、`--data-in=base64` などの形式で渡してください。
+- 文字コードはUTF-8で固定です。
+- 時間のかかる処理（`DeriveKey`、`HashPassword` など）には `--async=識別子` を付けてください。結果はあとでイベント（`OnInternalSaoriComplete` など）で届き、`FUNCTIONEX` の戻り値は空（`LIB.STATUSCODE` は `204 No Content`）です。
+
 ---
 
 ### `SAORI(dll名, 引数0, 引数1, ...)`
 
-`FUNCTIONEX` のシノニム（別名）です。書き方が `FUNCTIONEX` と同一です。
+`FUNCTIONEX` のシノニム（別名）です。書き方が `FUNCTIONEX` と同一です（`internal_` の内蔵モジュールも同じ）。
 
 ```
 _result = SAORI('kawari8.dll', 'こんにちは')
@@ -150,11 +166,33 @@ _result = SAORI('kawari8.dll', 'こんにちは')
 
 ## 4. ベースウェアプロパティ関数
 
-SSPなど、DIRECTSSTP対応ベースウェアのプロパティを読み書きします。
+SSPなど、DIRECTSSTP対応ベースウェアのプロパティを読み書きしたり、EXECUTE SSTPのコマンドを実行したりします。
+
+### `EXECUTE_SSTP(コマンド名, 引数0, 引数1, ...)`
+
+DIRECTSSTPでベースウェアに `EXECUTE SSTP/1.1` のリクエストを送り、結果（追加データ）を返します。2つめ以降の引数は `Reference0`、`Reference1`、… として送られます。使えるコマンドはベースウェアのSSTP仕様（`GetVersion`、`GetGhostNameList`、`GetStatus`、`GetCookie` など）を参照してください。
+
+- **引数**：`_argv[0]` — コマンド名、`_argv[1]` 以降 — `Reference0` 以降に入れる値
+- **戻り値**：成功時（ステータスが2xx）は空行より後ろの追加データ（末尾の改行は取り除く）、失敗時は空文字列。一覧を返すコマンドの結果は `C_CRLF` 区切りの文字列になります
+- **結果の変数**：`SSTP.STATUSCODE` にステータス行の結果（`200 OK`、`501 Not Implemented` など）、`SSTP.STATUS` にその数値が入ります。送信できなかったときは `''` と `0` です
+
+追加データの無いコマンドは、成功しても空文字列を返すので、成否は `SSTP.STATUS` で確かめてください。
+
+```
+_ver = EXECUTE_SSTP('GetShortVersion')
+_ghosts = SPLIT(EXECUTE_SSTP('GetGhostNameList'), C_CRLF)
+
+_dummy = EXECUTE_SSTP('SetCookie', 'mykey', 'value')
+if SSTP.STATUS == 200 || SSTP.STATUS == 204 {
+	// 成功
+}
+```
+
+---
 
 ### `GET_PROPERTY(プロパティ名)`
 
-指定したベースウェアのプロパティ値を取得します。
+指定したベースウェアのプロパティ値を取得します。`EXECUTE_SSTP('GetProperty', プロパティ名)` と同じで、`SSTP.STATUSCODE` と `SSTP.STATUS` も同じように入ります（`SET_PROPERTY` も同様）。
 
 - **引数**：`_argv[0]` — プロパティ名
 - **戻り値**：成功時はプロパティ値の文字列、失敗時は空文字列
@@ -516,6 +554,25 @@ OnSHIORI3FW.ChangeSelfInfo
 
 ---
 
+## 付録：AIグラフの既定値（`On_getaistate`）
+
+SSP の AIグラフ（レーダーチャート）は、SHIORI リソース `getaistate` で描かれます。ゴースト側に `On_getaistate` が無い、または空を返したときは、システム辞書の `SHIORI3EV.On_getaistate` が次の 6 軸を返します。ゴースト側で `On_getaistate` を定義すれば、そちらが優先されます。
+
+| ラベル | 表示値 | 加算値 | 最大値 |
+|--------|--------|--------|--------|
+| `Boot` | `ghostuptimes`（累計起動回数） | 0 | 段階スケール |
+| `Uptime(h)` | `ghostupmin_last / 60`（前回までの累計起動時間） | `ghostupmin / 60`（今回の起動分） | 段階スケール |
+| `Memory` | `GETVARLIST()` の要素数 | 0 | 段階スケール |
+| `Repertoire` | `GETFUNCLIST('On')` の要素数 | 0 | 段階スケール |
+| `Talk/h` | `3600 / aitalkinterval`（`aitalkinterval` が 0 以下なら 0） | 0 | 段階スケール |
+| `Social` | `communicateratio` | 0 | 100 |
+
+- 段階スケールは、値を収められる最小の `10, 20, 50, 100, 200, 500, …`（`SHIORI3FW.AIGraphMax`）です。
+- `Memory` と `Repertoire` には、システム辞書自身の変数・関数も含まれます。
+- `Uptime(h)` の表示値と加算値は小数です（SSP 2.4.26 以降が小数を扱えます）。
+
+---
+
 ## 付録：config.dic の主要設定
 
 `yaya_base/config.dic` でシステム動作を変更できます。
@@ -788,6 +845,26 @@ OnNetworkUpdateComplete
 // 玉・tamac から
 ?? SHIORI3FW.Lint.Run
 ?? SHIORI3FW.Lint.Run('system')
+```
+
+### `ShioriLint`（SHIORI イベント）
+
+里々（satori）の `ShioriLint` と同じ形で、辞書の検査結果を返します。ツールが里々と YAYA を同じ方法で検査できます。`SecurityLevel: local` の `GET` で `ID: ShioriLint` を送ると、`SHIORI3EV.On_ShioriLint` が `SHIORI3FW.Lint.Run` と同じ検査をします。`Has_Event` / `Get_Supported_Events` にも現れます。
+
+- **Reference0**：オプション（`SHIORI3FW.Lint.Run` と同じ。省略可）
+- **応答**：`Value` は返さず（`204 No Content`）、検査結果を 1 件 1 要素で、バイト値 1 区切りの `ErrorLevel` と `ErrorDescription` ヘッダに並べます。指摘が 1 件も無いときは、どちらのヘッダも付きません。
+  - `ErrorDescription`：`ファイル(行) : レベル: 種類 '名前' in 関数名 (did you mean: 候補)`。ファイルは `yaya.dll` のあるフォルダからの相対パスです。
+  - `ErrorLevel`：`unused …` は `notice`、それ以外（`read undefined …`、`assignment in condition`）は `warning`。
+- **件数の上限**：全体で 1000 件、`notice` は 100 件までです（里々と同じ）。超えた分は省略し、最後に `info` で `SHIORI3FW.Lint: n more findings were omitted` と知らせます。
+- **検査できないとき**：YAYA が Tc574-1 より古いと、`error` で理由を 1 件だけ返します。
+- `SecurityLevel: external` では、`ExternalEvent.ShioriLint` が無いため `204` のまま何も返しません。
+
+```
+GET SHIORI/3.0
+Charset: UTF-8
+Sender: test
+SecurityLevel: local
+ID: ShioriLint
 ```
 
 #### 使われているとみなすもの
