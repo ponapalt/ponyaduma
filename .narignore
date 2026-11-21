@@ -7,7 +7,7 @@ CLAUDE.md
 .gitignore
 ghost/master/yaya_variable.cfg
 
-# 開発キット（tools/update-devkit.ps1 が管理するもの）
+# 旧 AI 開発キットの除外（移行後は該当ファイルなし。残っていても害はない）
 AGENTS.md
 GHOST.md
 DEVKIT-GUIDE.md
@@ -19,3 +19,23 @@ tools/
 *.devkit-new
 *.yaya-dic-new
 ghost/master/yayalint_config.lua
+
+# files for developing the ghost with ukagaka-developer (not shipped in the nar or in network updates)
+/AGENTS.md
+/CLAUDE.md
+/GHOST.md
+/.mcp.json
+/.claude/
+/.agents/
+/build/
+
+# files of the repository (git, editor, GitHub); the nar does not need them
+/.github/
+/.gitignore
+/.gitattributes
+/.editorconfig
+/.narignore
+/.updateignore
+
+# balloon images of sstp.ps1 -Balloon, left only when the script was stopped midway
+/ghost/master/devkit-balloon-*/

@@ -8,7 +8,8 @@ CLAUDE.md
 ghost/master/yaya_variable.cfg
 ponyaballoon/
 
-# 開発キット（tools/update-devkit.ps1 が管理するもの）
+# 開発用ファイル（旧 AI 開発キットの分を含む。ネットワーク更新に載せない）
+.agents/
 AGENTS.md
 GHOST.md
 DEVKIT-GUIDE.md

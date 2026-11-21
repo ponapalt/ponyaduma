@@ -1,7 +1,7 @@
 # GHOST.md
 
 このゴーストに固有の情報です。AI エージェントは、作業の前に `AGENTS.md` とあわせて読みます。
-作者が自由に書き換えるファイルで、開発キットの更新（`tools/update-devkit.ps1`）で上書きされることはありません。
+作者が自由に書き換えるファイルで、スキル `ukagaka-developer` の更新で上書きされることはありません。
 
 ## このゴーストについて
 
@@ -29,7 +29,7 @@
   - `include, lilith_config.txt` → `aya_lilith_config.dic`、`aya_lilith_ex_config.dic`、`dicdir, dic/system/aya_lilith`
   - `dicdir, dic/normal`（このゴーストのトークと処理。ここを書く）
 - 緊急モード: `ghost/master/dic/emerg/`（`yaya_emerg_dic.dic`、`yaya_homeurl.dic`）。辞書にエラーがあるとここだけが読まれる。
-- システム辞書（`ghost/master/dic/system/`）: yaya-dic とあやりりす。**編集しない**（更新は `docs/agents/workflows/update-yaya.md`）。
+- システム辞書（`ghost/master/dic/system/`）: yaya-dic とあやりりす。**編集しない**（更新はスキル `ukagaka-developer` の `references/yaya/update.md` の手順で行う）。
 - 文字コードはすべて UTF-8。
 
 ## イベントと辞書ファイルの対応
@@ -336,14 +336,14 @@ EX ヘッダの設定（`ghost/master/aya_lilith_ex_config.dic`）:
 - YAYA（yaya.dll）のマニュアル: `..\yaya-docs`（このリポジトリの外、隣のフォルダ）
 - あやりりす／あやりりす EX のサンプル: `..\ayalilith`（同上）
 
-`AGENTS.md` の「仕様の調べ方」にある方法（`ukagaka-doc` MCP、`ukagaka-researcher` サブエージェント）も使える。
+スキル `ukagaka-developer` の「仕様を調べる」にある方法（`ukagaka-doc` MCP、`ukagaka-researcher` サブエージェント）も使える。
 
 ### 辞書のチェック
 
-- 辞書のチェックは `powershell -NoProfile -ExecutionPolicy Bypass -File tools/check-dic.ps1` を使う（開発キットが `tools/bin/tamac.exe` を管理する）。
-- ルートの `tamac.exe` は開発キット導入前から置いてあるもので、`tools/` のスクリプトからは使われない。
+- 辞書のチェックは、スキル `ukagaka-developer` の `scripts/check-dic.ps1`（まとめて行うなら `scripts/check.ps1`）を使う。tamacs.exe はスキルがホームフォルダに作る。
+- ルートの `tamac.exe` は旧キットの導入前から置いてあるもので、スキルのスクリプトからは使われない。
 
 ### リリース
 
 - `.nar` の作成とリリースは GitHub Actions（`.github/workflows/release.yml` と `release_ghost.py`）で全自動。`delete.txt` と `updates2.dau` もそこで更新される。
-- 開発キットの `tools/build-nar.ps1` は、手元で `.nar` を確かめたいときに使う。リリース手順そのものは上の Actions が正。
+- スキルの `scripts/build-nar.ps1` は、手元で `.nar` を確かめたいときに使う。リリース手順そのものは上の Actions が正。

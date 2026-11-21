@@ -15,16 +15,25 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: install tamac
+      - name: get ukagaka-developer
+        # The scripts of the skill. To pin a version, add "--branch <tag or branch>" (see references/workflows/ci.md).
+        shell: pwsh
+        run: git clone --depth 1 https://github.com/ukatech/ukagaka-developer.git "$env:RUNNER_TEMP/ukagaka-developer"
+      - name: tools
+        # KAWARI only: kosui.exe, which the dictionary check of KAWARI uses (the latest release of ukatech/kawari).
+        # Nothing is done for YAYA and SATORI. The token avoids the rate limit of the GitHub API on shared runners.
         shell: pwsh
         env:
-          # tamac.exe comes from its latest release; the token avoids the rate limit of anonymous GitHub API requests
           GITHUB_TOKEN: ${{ github.token }}
-        run: ./tools/setup.ps1 -Tool tamac
+        run: 'if (Test-Path "$env:GITHUB_WORKSPACE/ghost/master/kawarirc.kis") { & "$env:RUNNER_TEMP/ukagaka-developer/skills/ukagaka-developer/scripts/setup.ps1" -Tool kosui -GhostRoot $env:GITHUB_WORKSPACE }; exit 0'
       - name: dictionary check
+        # YAYA and SATORI: builds tamacs.exe with csc.exe of the .NET Framework on the runner, loads the SHIORI dll
+        # with it and reads its log. KAWARI: kosui --check (found from ghost/master)
         shell: pwsh
-        run: ./tools/check-dic.ps1 -Ci
-      - name: development kit lock check
-        # Runs only in the repository that distributes the kit (source in tools/devkit.json)
+        run: '& "$env:RUNNER_TEMP/ukagaka-developer/skills/ukagaka-developer/scripts/check-dic.ps1" -Ci -GhostRoot $env:GITHUB_WORKSPACE'
+      - name: custom checks
+        # The checks of this ghost, listed in .github/ghost-checks.json (references/workflows/custom-checks.md).
+        # Nothing is done when the file does not exist. Runs even if the dictionary check failed, to show both results.
+        if: ${{ !cancelled() }}
         shell: pwsh
-        run: ./tools/update-devkit.ps1 -VerifyLock
+        run: '& "$env:RUNNER_TEMP/ukagaka-developer/skills/ukagaka-developer/scripts/check-custom.ps1" -Ci -GhostRoot $env:GITHUB_WORKSPACE'
