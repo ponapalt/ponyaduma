@@ -19,6 +19,8 @@ OpenMenu
 	<<"
 	ぽ００：メニューなのです。
 	＠メニュー：なんか話して｜Menu_AITALK
+	＠メニュー【pomo_state == 0】：集中する（ポモドーロ）｜Menu_POMODORO
+	＠メニュー【pomo_state != 0】：集中タイマーを見る｜Menu_POMODORO
 	＠メニュー：しゃべり頻度を変えて｜Menu_TALKINTERVAL
 	＠メニュー：名前を教えて｜Menu_NAMEINPUT
 	＠メニュー：他のゴーストと話す｜Menu_GHOSTCOMSTART
@@ -99,7 +101,7 @@ Menu_CANCEL
 Menu_TALKMAX
 {
 	//---- うるさく話す(15秒間隔)
-	aitalkinterval = 15
+	トーク間隔設定(15)
 	<<"
 	ぽ０５：うるさいくらい話すのです！任せてなのです！
 	れ１０：ほんまにええんか、うるさいで。
@@ -109,7 +111,7 @@ Menu_TALKMAX
 Menu_TALKNORMAL
 {
 	//---- ふつうに話す(3分間隔)
-	aitalkinterval = 180
+	トーク間隔設定(180)
 	<<"
 	ぽ００：ふつうくらいに話すのです。……ふつうって何なのです？
 	れ１０：知らんがな。
@@ -119,7 +121,7 @@ Menu_TALKNORMAL
 Menu_TALKPOOR
 {
 	//---- 静かに話す(5分間隔)
-	aitalkinterval = 300
+	トーク間隔設定(300)
 	<<"
 	ぽ０１：あまり話さないようにするのです……
 	れ１０：まあ、用があったら呼んでな。
@@ -129,7 +131,7 @@ Menu_TALKPOOR
 Menu_TALKNONE
 {
 	//---- 話さない
-	aitalkinterval = 0
+	トーク間隔設定(0)
 	<<"
 	ぽ０８：了解、なのです……。
 	">>

@@ -16,6 +16,9 @@ ghost/master/yaya_variable.cfg
 /.agents/
 /build/
 
+# development tools of the author (e.g. the generator of the pomodoro progress ring images); not shipped
+/dev/
+
 # balloon images of sstp.ps1 -Balloon, left only when the script was stopped midway
 /ghost/master/devkit-balloon-*/
 
