@@ -10,3 +10,4 @@ updates2.dau
 updates.txt
 *.nar
 /build/
+/dev/__pycache__
