@@ -5,6 +5,9 @@
 作るもの（52x52 の透過 PNG。12 時の位置から時計回りに満ちていく）:
   surface3000.png 〜 surface3060.png   集中リング（0/60 〜 60/60）
   surface3100.png 〜 surface3160.png   休憩リング（0/60 〜 60/60）
+  surface3200.png                      一時停止ボタン（⏸。サークルの中央。集中中・休憩中に出す）
+  surface3201.png                      再開ボタン（▶。一時停止中に ⏸ の代わりに出す）
+  surface3202.png                      休憩を飛ばすボタン（▶|。休憩中に出す）
 
 色や太さを変えるときは、下の定数を書き換えて、もう一度実行する。
 画像の置き場所（座標）は shell/master/surfaces.txt の animation3000〜、3100〜 の pattern にある。
@@ -26,6 +29,10 @@ TRACK = (246, 246, 250, 235)     # 未到達部分（ほぼ白）
 EDGE = (64, 64, 76, 200)         # 縁取り（半透明。シェルは seriko.use_self_alpha,1 なので、アルファはそのまま使われる）
 FOCUS = (242, 85, 44, 255)       # 集中: トマトの赤橙
 BREAK = (43, 181, 160, 255)      # 休憩: 青緑
+
+BUTTON_BG = (64, 64, 76, 150)    # ボタンの下地（リングの穴を暗く半透明にして、どんな壁紙でもアイコンを読めるようにする）
+BUTTON_ICON = (246, 246, 250, 255)   # ボタンのアイコン
+R_BUTTON = R_IN - 1.5            # ボタンの下地の半径（リングの縁取りの内側ぴったり）。当たり判定は surfaces.txt の PomoPause
 
 CENTER = SIZE * SS / 2.0
 
@@ -78,6 +85,29 @@ def make_frame(color, k):
     return small.convert("RGBA")
 
 
+def make_button(kind):
+    """サークル中央のボタン。kind は 'pause'（⏸）、'play'（▶）、'skip'（▶|）。"""
+    c = SIZE / 2.0
+    bg = Image.new("L", (SIZE * SS, SIZE * SS), 0)
+    d = ImageDraw.Draw(bg)
+    d.ellipse([CENTER - R_BUTTON * SS, CENTER - R_BUTTON * SS, CENTER + R_BUTTON * SS, CENTER + R_BUTTON * SS], fill=255)
+    icon = Image.new("L", (SIZE * SS, SIZE * SS), 0)
+    d = ImageDraw.Draw(icon)
+    if kind == "pause":
+        for x0, x1 in ((c - 6, c - 2), (c + 2, c + 6)):
+            d.rectangle([x0 * SS, (c - 6) * SS, x1 * SS - 1, (c + 6) * SS - 1], fill=255)
+    elif kind == "skip":
+        # ▶|（休憩を飛ばして、次の集中へ）
+        d.polygon([((c - 6) * SS, (c - 6) * SS), ((c - 6) * SS, (c + 6) * SS), ((c + 2) * SS, c * SS)], fill=255)
+        d.rectangle([(c + 4) * SS, (c - 6) * SS, (c + 6) * SS - 1, (c + 6) * SS - 1], fill=255)
+    else:
+        d.polygon([((c - 4.0) * SS, (c - 7.0) * SS), ((c - 4.0) * SS, (c + 7.0) * SS), ((c + 7.0) * SS, c * SS)], fill=255)
+    img = Image.new("RGBA", (SIZE * SS, SIZE * SS), (0, 0, 0, 0))
+    img = Image.alpha_composite(img, layer(BUTTON_BG, bg))
+    img = Image.alpha_composite(img, layer(BUTTON_ICON, icon))
+    return img.convert("RGBa").resize((SIZE, SIZE), Image.BOX).convert("RGBA")
+
+
 def main():
     here = os.path.dirname(os.path.abspath(__file__))
     out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, "..", "shell", "master")
@@ -86,7 +116,10 @@ def main():
         for k in range(STEPS + 1):
             path = os.path.join(out, "surface%d.png" % (base + k))
             make_frame(color, k).save(path)
-    print("wrote %d images to %s" % ((STEPS + 1) * 2, os.path.abspath(out)))
+    make_button("pause").save(os.path.join(out, "surface3200.png"))
+    make_button("play").save(os.path.join(out, "surface3201.png"))
+    make_button("skip").save(os.path.join(out, "surface3202.png"))
+    print("wrote %d images to %s" % ((STEPS + 1) * 2 + 3, os.path.abspath(out)))
 
 
 if __name__ == "__main__":

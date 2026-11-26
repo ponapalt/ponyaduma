@@ -260,6 +260,12 @@ sakura.bindgroup3159.name,休憩リング,進捗59
 sakura.bindgroup3159.default,0
 sakura.bindgroup3160.name,休憩リング,進捗60
 sakura.bindgroup3160.default,0
+sakura.bindgroup3200.name,集中ボタン,一時停止
+sakura.bindgroup3200.default,0
+sakura.bindgroup3201.name,集中ボタン,再開
+sakura.bindgroup3201.default,0
+sakura.bindgroup3202.name,集中ボタン,休憩スキップ
+sakura.bindgroup3202.default,0
 
 kero.bindgroup9100.name,外装色変更,水ばぐゅう
 kero.bindgroup9100.default,0

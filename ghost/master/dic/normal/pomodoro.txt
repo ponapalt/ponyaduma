@@ -18,7 +18,16 @@
 //   pomo_aitalk_backup / pomo_interval_override
 //                    集中中は aitalkinterval を 0 にして本体のランダムトークを止める。
 //                    元の値を退避しておき、集中が終わったら戻す。
+//   pomo_last_focus / pomo_last_break
+//                    直近に「自分で決める」で入力した集中と休憩の分数（0 なら入力した履歴なし）
+//   pomo_last_show   1 なら、その分数を時間選択の選択肢に出す（定番の 3 つと同じ分数なら 0）
 //   pomo_ring_shown  シェルに出している進捗リングの着せ替え（'カテゴリ,パーツ'。無ければ ''）
+//   pomo_btn_shown   シェルに出している一時停止／再開ボタンの着せ替え（同上）
+//   pomo_paused_at   一時停止した時刻（GETSECCOUNT の絶対時刻。0 なら止めていない）
+//                    止めている間は、時刻を持つ変数（pomo_end / pomo_mid / pomo_talk_next）を触らず、
+//                    再開のときに止めていた秒数だけ、まとめて後ろへずらす。
+//                    今の時刻が要る所は GETSECCOUNT ではなく 集中現在時刻 を使う。
+//                    一時停止は集中中だけ。休憩中は、ボタンが「休憩を飛ばす」(▶|) に代わる。
 //
 // 進捗リング（\0 の頭の右上）: シェルの着せ替え。集中リング（橙赤）と休憩リング（青緑）に、
 // 進捗00〜進捗60 の 61 段がある（画像は dev/make-ring.py が作る）。進捗が 1 段進んだ秒に、
@@ -71,13 +80,29 @@
 	if ISVAR('pomo_custom_focus') == 0 {
 		pomo_custom_focus = 25
 	}
+	if ISVAR('pomo_last_focus') == 0 {
+		pomo_last_focus = 0
+	}
+	if ISVAR('pomo_last_break') == 0 {
+		pomo_last_break = 0
+	}
+	if ISVAR('pomo_last_show') == 0 {
+		pomo_last_show = 0
+	}
 	if ISVAR('pomo_ring_shown') == 0 {
 		pomo_ring_shown = ''
+	}
+	if ISVAR('pomo_btn_shown') == 0 {
+		pomo_btn_shown = ''
+	}
+	if ISVAR('pomo_paused_at') == 0 {
+		pomo_paused_at = 0
 	}
 
 	//ゴーストを閉じている間に終わりの時刻を過ぎていたら、集中は無かったことにする
 	//（開き直した直後に、遅れた鐘が鳴らないようにする）
-	if pomo_state != 0 {
+	//一時停止中は終わりの時刻が進まないので、期限切れにしない
+	if pomo_state != 0 && pomo_paused_at == 0 {
 		if GETSECCOUNT > pomo_end {
 			集中リセット
 		}
@@ -95,6 +120,7 @@
 	pomo_mid = 0
 	pomo_talk_next = 0
 	pomo_overrun = 0
+	pomo_paused_at = 0
 }
 
 //------------------------------------------------------------------------------
@@ -139,12 +165,20 @@
 //------------------------------------------------------------------------------
 集中開始
 {
+	集中開始処理(TOINT(_argv[0]), TOINT(_argv[1]))
+	集中開始トーク
+}
+
+//---- 集中の状態を作る（トークは返さない）。_argv[0] = 集中の分数、_argv[1] = 休憩の分数
+集中開始処理 : void
+{
 	pomo_focus_min = TOINT(_argv[0])
 	pomo_break_min = TOINT(_argv[1])
 	pomo_state = 1
 	pomo_end = GETSECCOUNT + pomo_focus_min * 60
 	pomo_mid = 0
 	pomo_overrun = 0
+	pomo_paused_at = 0
 
 	//本体のランダムトークを止める（元の値は退避）
 	if pomo_interval_override == 0 {
@@ -160,8 +194,6 @@
 	else {
 		pomo_talk_next = 0
 	}
-
-	集中開始トーク
 }
 
 //------------------------------------------------------------------------------
@@ -170,8 +202,8 @@
 //------------------------------------------------------------------------------
 OnSecondChange
 {
-	//待機中で、リングも出ていなければ、何もしない
-	if pomo_state == 0 && pomo_ring_shown == '' {
+	//待機中で、リングもボタンも出ていなければ、何もしない
+	if pomo_state == 0 && pomo_ring_shown == '' && pomo_btn_shown == '' {
 		return
 	}
 
@@ -183,8 +215,14 @@ OnSecondChange
 		return
 	}
 
-	//待機に戻ったのにリングが残っていたら消す
+	//待機に戻ったのにリングやボタンが残っていたら消す
 	if pomo_state == 0 {
+		集中リング更新
+		return
+	}
+
+	//一時停止中は、時間に関わる判定（鐘・実況・専用トーク）を全部飛ばして、表示だけ合わせる
+	if pomo_paused_at > 0 {
 		集中リング更新
 		return
 	}
@@ -251,7 +289,7 @@ OnSecondChange
 		_cat = '休憩リング'
 	}
 	//区間の始まりからの経過を 60 等分する（0〜60。画像の段数は dev/make-ring.py の STEPS）
-	_k = (GETSECCOUNT - (pomo_end - _dur)) * 60 / _dur
+	_k = (集中現在時刻 - (pomo_end - _dur)) * 60 / _dur
 	if _k < 0 {
 		_k = 0
 	}
@@ -265,32 +303,82 @@ OnSecondChange
 	_cat + ',進捗' + _n
 }
 
-//---- リングが変わるときだけ、切り替えのスクリプトを返す（変わらなければ ''）
-//     先頭の \C は、直前のトークの吹き出しを消さないため。
-//     状態（pomo_ring_shown）は、スクリプトを返す分岐の中でだけ書き換える。
-集中リング更新
+//---- 今の時刻。一時停止中は、止めた時刻のまま進まない
+集中現在時刻
 {
+	if pomo_paused_at > 0 {
+		pomo_paused_at
+	}
+	else {
+		GETSECCOUNT
+	}
+}
+
+//---- 今出すべき一時停止／再開ボタンを 'カテゴリ,パーツ' で返す（待機中は ''）
+集中ボタン目標
+{
+	if pomo_state == 0 {
+		''
+	}
+	elseif pomo_state == 2 {
+		'集中ボタン,休憩スキップ'
+	}
+	elseif pomo_paused_at > 0 {
+		'集中ボタン,再開'
+	}
+	else {
+		'集中ボタン,一時停止'
+	}
+}
+
+//---- リングとボタンの、今の表示とのずれを直す \![bind] の列を返す（ずれが無ければ ''）
+//     返したスクリプトを実際に再生する前提で、表示の記録（pomo_ring_shown / pomo_btn_shown）を書き換える。
+//     \C\0 は付けない（付けるのは 集中リング更新。トークと一緒に使うときは、呼ぶ側が決める）。
+集中リング差分
+{
+	_s = ''
 	_target = 集中リング目標
-	if _target == pomo_ring_shown {
-		return
+	if _target != pomo_ring_shown {
+		if pomo_ring_shown != '' {
+			_s += '\![bind,' + pomo_ring_shown + ',0]'
+		}
+		if _target != '' {
+			_s += '\![bind,' + _target + ',1]'
+		}
+		pomo_ring_shown = _target
 	}
-	_s = '\C\0'
-	if pomo_ring_shown != '' {
-		_s += '\![bind,' + pomo_ring_shown + ',0]'
+	_btn = 集中ボタン目標
+	if _btn != pomo_btn_shown {
+		if pomo_btn_shown != '' {
+			_s += '\![bind,' + pomo_btn_shown + ',0]'
+		}
+		if _btn != '' {
+			_s += '\![bind,' + _btn + ',1]'
+		}
+		pomo_btn_shown = _btn
 	}
-	if _target != '' {
-		_s += '\![bind,' + _target + ',1]'
-	}
-	pomo_ring_shown = _target
 	_s
 }
 
-//---- ゴーストを起動して最初のスクリプトの前に、前回のリングを消す
-//     （続きの集中があれば、次の秒の OnSecondChange でリングを付け直す）
+//---- リングかボタンが変わるときだけ、切り替えのスクリプトを返す（変わらなければ ''）
+//     先頭の \C は、直前のトークの吹き出しを消さないため。
+//     状態は、スクリプトを返す分岐の中でだけ書き換える。
+集中リング更新
+{
+	_d = 集中リング差分
+	if _d == '' {
+		return
+	}
+	'\C\0' + _d
+}
+
+//---- ゴーストを起動して最初のスクリプトの前に、前回のリングとボタンを消す
+//     （続きの集中があれば、次の秒の OnSecondChange でリングとボタンを付け直す）
 起動初期化スクリプト
 {
 	pomo_ring_shown = ''
-	'\0\![bind,集中リング,,0]\![bind,休憩リング,,0]'
+	pomo_btn_shown = ''
+	'\0\![bind,集中リング,,0]\![bind,休憩リング,,0]\![bind,集中ボタン,,0]'
 }
 
 //------------------------------------------------------------------------------
@@ -299,6 +387,7 @@ OnSecondChange
 集中終了
 {
 	pomo_state = 2
+	pomo_paused_at = 0
 	pomo_end = GETSECCOUNT + pomo_break_min * 60
 	pomo_talk_next = 0
 
@@ -347,11 +436,14 @@ OnSecondChange
 
 集中開始トーク
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	ぽ０５．２０４７：（ユーザー）、%(pomo_focus_min)分集中なのです！そのあと%(pomo_break_min)分は休憩なのです！
 	れ１０：きっちりしとるなぁ。
 	ぽ０５．２０１１：バランスが大事なのです！
 	-----
+	＠スクリプト：%(_b)
 	ぽ０５．２０４７：始めるのです！%(pomo_focus_min)分なのです！
 	れ１０：時計係はぽにゃか。
 	ぽ０５．２０３３：任せてほしいのです！
@@ -360,13 +452,17 @@ OnSecondChange
 
 集中鐘通常
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	ぽ０５．２０４７：時間なのです！%(pomo_break_min)分、休憩なのです！
 	れ１０：ええ区切りやな。
 	-----
+	＠スクリプト：%(_b)
 	ぽ０５．２０３３：お疲れさまなのです！休憩に入るのです！
 	れ１０：%(pomo_break_min)分や。ぽにゃ、数えときや。
 	-----
+	＠スクリプト：%(_b)
 	ぽ０８：きっちり時間なのです。バランスが大事なのです。
 	れ１０．２０２１：ぽにゃが言うと説得力あるなぁ。
 	">>
@@ -374,12 +470,15 @@ OnSecondChange
 
 休憩終了通常
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	ぽ０５：休憩おしまいなのです！
 	れ１０：どないする、もう一回いくか。
 	＠メニュー：もう一回｜Menu_POMODORO_AGAIN
 	＠メニュー：ここまで｜Menu_POMODORO_DONE
 	-----
+	＠スクリプト：%(_b)
 	ぽ０５．２０４７：%(pomo_break_min)分、経ったのです！
 	れ１０：早いな。ほんまに休んどったんか。
 	＠メニュー：もう一回｜Menu_POMODORO_AGAIN
@@ -436,7 +535,9 @@ OnSecondChange
 //---- 型 0：あと一行だけ
 集中延長鐘0
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	ぽ０５．２０４７：時間なのです！%(pomo_break_min)分、休憩なのです！
 	れ１０：ほな休憩やな。
 	ぽ０６：…
@@ -457,7 +558,9 @@ OnSecondChange
 
 集中延長止め0
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	れ１１：ぽにゃ、飯。
 	ぽ０２．２０４７：…え？休憩、もう終わりなのです…？
 	れ１１．２０５０：%(pomo_break_min)分、まるごと消えたで。
@@ -469,7 +572,9 @@ OnSecondChange
 //---- 型 1：休憩のタイマーを改良し始める
 集中延長鐘1
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	ぽ０５．２０４７：時間なのです！%(pomo_break_min)分、休憩なのです！
 	れ１０：ほな休憩やな。
 	ぽ０６．２０４３：…このタイマー、表示をもう少し見やすくできそうなのです。
@@ -488,12 +593,166 @@ OnSecondChange
 
 集中延長止め1
 {
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	れ１０：ぽにゃ。
 	ぽ０２：…あっ。休憩、もう終わりなのです？
 	れ１０．２０５０：%(pomo_break_min)分、全部タイマーに使うたで。
 	＠メニュー：もう一回｜Menu_POMODORO_AGAIN
 	＠メニュー：ここまで｜Menu_POMODORO_DONE
+	">>
+}
+
+//******************************************************************************
+// 一時停止／再開ボタン（サークルの中央。シェルの当たり判定 PomoPause）
+//   あやりりすのマウス処理が、「種別 + スコープ + 部位」の名前の関数を呼ぶ。
+//   一時停止中は pomo_paused_at に止めた時刻を持ち、再開で、止めていた秒数だけ時刻を後ろへずらす。
+//   ダブルクリックと多重クリックは、何もしない関数で受けて、ボタンの連打が別の反応にならないようにする。
+//******************************************************************************
+
+クリック0PomoPause
+{
+	//一時停止は集中中だけ（休憩中は、代わりに「休憩を飛ばす」ボタンが出る）。
+	//ボタンの表示が残っていても、押された扱いにしない
+	if pomo_state != 1 {
+		-1
+		return
+	}
+
+	if pomo_paused_at > 0 {
+		//再開。止めていた秒数だけ、絶対時刻を持つ変数をずらす
+		_gap = GETSECCOUNT - pomo_paused_at
+		pomo_end += _gap
+		if pomo_mid > 0 {
+			pomo_mid += _gap
+		}
+		if pomo_talk_next > 0 {
+			pomo_talk_next += _gap
+		}
+		pomo_paused_at = 0
+	}
+	else {
+		pomo_paused_at = GETSECCOUNT
+	}
+
+	//ボタンの絵とリングを、トークと同じスクリプトの頭で切り替える（トークの各候補の最初の行に入る）
+	_d = 集中リング差分
+	if pomo_paused_at > 0 {
+		集中一時停止トーク(_d)
+	}
+	else {
+		集中再開トーク(_d)
+	}
+}
+
+ダブルクリック0PomoPause
+{
+	''
+}
+
+多重クリック0PomoPause
+{
+	''
+}
+
+//---- 一時停止のトーク。_argv[0] = 同時に切り替える \![bind]（各候補の最初の行に入れる）
+集中一時停止トーク
+{
+	_b = _argv[0]
+	<<"
+	＠スクリプト：%(_b)
+	ぽ０８：ちょっと止めるのです。
+	れ１０：時計係が止めてどないすんねん。
+	-----
+	＠スクリプト：%(_b)
+	ぽ０６：…一旦、止めるのです。
+	れ１０．２０２１：ええとこで止めたな。
+	-----
+	＠スクリプト：%(_b)
+	ぽ０５：休憩じゃないのです、一時停止なのです。
+	れ１０：どう違うねん。
+	ぽ０８：…気持ちの問題なのです。
+	">>
+}
+
+//---- 再開のトーク。_argv[0] は同上
+集中再開トーク
+{
+	_b = _argv[0]
+	<<"
+	＠スクリプト：%(_b)
+	ぽ０５．２０４７：再開なのです！
+	れ１０：どこ行っとったん。
+	-----
+	＠スクリプト：%(_b)
+	ぽ０５．２０３３：続きなのです！止めた分は、ちゃんと足してあるのです。
+	れ１０：ずるしとらんやろな。
+	-----
+	＠スクリプト：%(_b)
+	ぽ０８：…動かすのです。
+	れ１０：おかえり。
+	">>
+}
+
+//---- リング（ボタン以外の部分）のクリックは、ポモドーロのメニューを開く。
+//     ボタンの当たり判定のほうが手前なので、ボタンの上は PomoPause / PomoSkip になる
+クリック0PomoRing
+{
+	if pomo_state == 0 {
+		-1
+		return
+	}
+	Menu_POMODORO
+}
+
+ダブルクリック0PomoRing
+{
+	''
+}
+
+多重クリック0PomoRing
+{
+	''
+}
+
+//---- 休憩を飛ばして、次の集中を始める（休憩中だけ。休憩ボタン ▶| のクリック）
+クリック0PomoSkip
+{
+	if pomo_state != 2 {
+		-1
+		return
+	}
+	//分数は直前の集中と休憩のまま。「ぽにゃが終わらない」休憩でも飛ばせる
+	集中開始処理(pomo_focus_min, pomo_break_min)
+	休憩スキップトーク
+}
+
+ダブルクリック0PomoSkip
+{
+	''
+}
+
+多重クリック0PomoSkip
+{
+	''
+}
+
+休憩スキップトーク
+{
+	_b = 集中リング差分
+	<<"
+	＠スクリプト：%(_b)
+	ぽ０５．２０４７：休憩はここまでなのです！次の集中なのです！
+	れ１０：まだ残っとるやん。
+	-----
+	＠スクリプト：%(_b)
+	ぽ０８：…もう始めてしまうのです。
+	れ１０．２０３５：ほんまに休んどったんか。
+	-----
+	＠スクリプト：%(_b)
+	ぽ０５．２０３３：もう整ったのです！
+	れ１０：何がやねん。
 	">>
 }
 
@@ -518,6 +777,7 @@ Menu_POMODORO
 	＠メニュー：25分集中 / 5分休憩（定番）｜Menu_POMODORO_25
 	＠メニュー：50分集中 / 10分休憩｜Menu_POMODORO_50
 	＠メニュー：15分集中 / 3分休憩｜Menu_POMODORO_15
+	＠メニュー【pomo_last_show != 0】：%(pomo_last_focus)分集中 / %(pomo_last_break)分休憩（前に決めた時間）｜Menu_POMODORO_LAST
 	＠メニュー：自分で決める｜Menu_POMODORO_CUSTOM
 	＠改行多めメニュー：戻る｜OpenMenu
 	">>
@@ -526,7 +786,8 @@ Menu_POMODORO
 集中メニュー進行
 {
 	<<"
-	ぽ００【pomo_overrun == 0】：集中タイマー、動いているのです。
+	ぽ００【pomo_overrun == 0 && pomo_paused_at == 0】：集中タイマー、動いているのです。
+	ぽ００【pomo_paused_at > 0】：集中タイマー、止めているのです。
 	ぽ０６【pomo_overrun != 0】：…
 	れ１０【pomo_overrun != 0】：ぽにゃは今、取り込み中や。
 	＠メニュー：今どのくらい？｜Menu_POMODORO_STATUS
@@ -550,6 +811,15 @@ Menu_POMODORO_15
 	集中開始(15, 3)
 }
 
+//---- 直近に「自分で決める」で入力した時間
+Menu_POMODORO_LAST
+{
+	if pomo_state != 0 || pomo_last_show == 0 {
+		return
+	}
+	集中開始(pomo_last_focus, pomo_last_break)
+}
+
 //---- 休憩のあとの「もう一回」。直前の分数をそのまま使う
 Menu_POMODORO_AGAIN
 {
@@ -570,7 +840,7 @@ Menu_POMODORO_DONE
 //---- 今どのくらい？
 Menu_POMODORO_STATUS
 {
-	_min = (pomo_end - GETSECCOUNT + 59) / 60
+	_min = (pomo_end - 集中現在時刻 + 59) / 60
 	if _min < 1 {
 		_min = 1
 	}
@@ -589,7 +859,9 @@ Menu_POMODORO_STOP
 {
 	集中リセット
 	void SHIORI3FW.ResetAITalkInterval(0)
+	_b = 集中リング差分
 	<<"
+	＠スクリプト：%(_b)
 	ぽ００：やめるのです。また始めるときは言ってほしいのです。
 	れ１０：さよか。
 	">>
@@ -625,6 +897,13 @@ OnPomodoroBreakInput
 	_b = TOINT(reference[0])
 	if _b < 1 || _b > 60 {
 		_b = 5
+	}
+	//直近の 1 回分を覚える。定番の 3 つと同じ分数なら、選択肢には出さない
+	pomo_last_focus = pomo_custom_focus
+	pomo_last_break = _b
+	pomo_last_show = 1
+	if (pomo_last_focus == 25 && _b == 5) || (pomo_last_focus == 50 && _b == 10) || (pomo_last_focus == 15 && _b == 3) {
+		pomo_last_show = 0
 	}
 	集中開始(pomo_custom_focus, _b)
 }
